@@ -5,40 +5,50 @@ import { X, Play, Pause as PauseIcon, SkipForward } from 'lucide-react';
 const DEMO_STEPS = [
   // ── OVERVIEW TAB ──────────────────────────────────────────
   { tab: 'overview', selector: '#nav-tab-overview',         label: 'Energy Overview',             desc: 'Your live household energy dashboard — solar, battery, demand & grid all in one view.' },
-  { tab: 'overview', selector: '.kpi-card.solar',           label: 'Solar Generation',             desc: 'Real-time kW output from your rooftop photovoltaic array — updated every second.' },
-  { tab: 'overview', selector: '.kpi-card.battery',         label: 'Powerwall Battery',            desc: 'State of charge & current charge/discharge rate of your home battery storage.' },
-  { tab: 'overview', selector: '.kpi-card.home',            label: 'Household Demand',             desc: 'Total active power draw across all connected appliances and EV chargers right now.' },
-  { tab: 'overview', selector: '.kpi-card.grid',            label: 'Grid Exchange',                desc: 'Net import from or export to the public electricity grid — positive = buying, negative = selling.' },
-  { tab: 'overview', selector: '.flow-diagram-container',   label: 'Vector Power Flow Matrix',     desc: 'Animated energy routing — shows how power flows from sources (solar, battery) to loads (home, grid).' },
+  { tab: 'overview', selector: '.grid-signal-pill',         label: 'Grid Traffic Signal',         desc: 'Live indicator showing if grid electricity is currently cheap (green) or expensive (red).' },
+  { tab: 'overview', selector: '.profile-pill',             label: 'Household Profile',           desc: 'Current optimization persona — switches rules between Family, EV Driver, or Guest.' },
+  { tab: 'overview', selector: 'button[title*="universal"]',label: 'Know Everything Mode',        desc: 'Click this anytime to reveal simple, non-technical explanations for every button and card.' },
+  { tab: 'overview', selector: '.kpi-card.solar',           label: 'Solar Generation',            desc: 'Real-time kW output from your rooftop photovoltaic array — updated every second.' },
+  { tab: 'overview', selector: '.kpi-card.battery',         label: 'Powerwall Battery',           desc: 'State of charge & current charge/discharge rate of your home battery storage.' },
+  { tab: 'overview', selector: '.kpi-card.home',            label: 'Household Demand',            desc: 'Total active power draw across all connected appliances and EV chargers right now.' },
+  { tab: 'overview', selector: '.kpi-card.grid',            label: 'Grid Exchange',               desc: 'Net import from or export to the public electricity grid — positive = buying, negative = selling.' },
+  { tab: 'overview', selector: '.flow-diagram-container',   label: 'Vector Power Flow Matrix',    desc: 'Animated energy routing — shows how power flows from sources (solar, battery) to loads.' },
+  { tab: 'overview', selector: '.col-span-5',               label: 'Power Usage Share',           desc: 'Live pie chart breaking down exactly which appliances are consuming electricity right now.' },
+  { tab: 'overview', selector: '[data-explain-title="24-Hour Energy Graph"]', label: '24-Hour Telemetry Graph', desc: 'Interactive history of your solar generation, home load, and battery charging.' },
 
   // ── DEVICES TAB ───────────────────────────────────────────
-  { tab: 'devices',  selector: '#nav-tab-devices',          label: 'Connected Devices',            desc: 'Your full smart hardware fleet — EVs, heat pumps, solar inverters, batteries and appliances.' },
-  { tab: 'devices',  selector: '.device-card:nth-child(1)', label: 'Tesla Wall Connector Gen 3',   desc: 'EV charger actively delivering 7.4 kW — currently at 76% SOC, targeting 85% by 07:00 AM.' },
-  { tab: 'devices',  selector: '.device-card:nth-child(2)', label: 'Tesla Powerwall 2',            desc: 'Home battery at 84% charge — absorbing surplus solar before peak tariff window opens.' },
-  { tab: 'devices',  selector: '.device-card:nth-child(3)', label: 'Enphase Solar Inverter',       desc: 'Solar microinverter producing 5.8 kW — maximum clean generation during midday solar peak.' },
-  { tab: 'devices',  selector: '.device-card:nth-child(4)', label: 'Daikin Altherma Heat Pump',    desc: 'HVAC running in MODULATING mode at 1.5 kW — pre-heating house before expensive tariff hour.' },
+  { tab: 'devices',  selector: '#nav-tab-devices',          label: 'Connected Devices',           desc: 'Your full smart hardware fleet — EVs, heat pumps, solar inverters, batteries and appliances.' },
+  { tab: 'devices',  selector: 'button[data-explain-title="Connect Device Wizard"]', label: 'Connect New Device', desc: 'Universal pairing wizard for adding new solar inverters, EVs, or smart appliances.' },
+  { tab: 'devices',  selector: '.device-card:nth-child(1)', label: 'Tesla Wall Connector Gen 3',  desc: 'EV charger actively delivering 7.4 kW — currently at 76% SOC, targeting 85% by 07:00 AM.' },
+  { tab: 'devices',  selector: '.device-card:nth-child(2)', label: 'Tesla Powerwall 2',           desc: 'Home battery at 84% charge — absorbing surplus solar before peak tariff window opens.' },
+  { tab: 'devices',  selector: '.device-card:nth-child(3)', label: 'Enphase Solar Inverter',      desc: 'Solar microinverter producing 5.8 kW — maximum clean generation during midday solar peak.' },
+  { tab: 'devices',  selector: '.device-card:nth-child(4)', label: 'Daikin Altherma Heat Pump',   desc: 'HVAC running in MODULATING mode at 1.5 kW — pre-heating house before expensive tariff hour.' },
 
   // ── SCHEDULING TAB ────────────────────────────────────────
-  { tab: 'scheduling', selector: '#nav-tab-scheduling',     label: 'Smart Scheduling',             desc: 'Calendar-based energy planner — automatically shifts tasks to cheapest tariff windows.' },
-  { tab: 'scheduling', selector: '.gantt-container',        label: '7-Day Gantt Timeline',         desc: 'Drag-and-drop timeline showing when each appliance runs relative to solar & price forecasts.' },
+  { tab: 'scheduling', selector: '#nav-tab-scheduling',     label: 'Smart Scheduling',            desc: 'Calendar-based energy planner — automatically shifts tasks to cheapest tariff windows.' },
+  { tab: 'scheduling', selector: '.day-btn:nth-child(2)',   label: 'Daily Schedule Planner',      desc: 'Select any day of the week to view and modify upcoming automated appliance runs.' },
+  { tab: 'scheduling', selector: '.gantt-container',        label: '7-Day Gantt Timeline',        desc: 'Drag-and-drop timeline showing when each appliance runs relative to solar & price forecasts.' },
 
   // ── CONTROLS TAB ──────────────────────────────────────────
-  { tab: 'controls', selector: '#nav-tab-controls',         label: 'Priorities & Controls',        desc: 'Set your non-negotiable thresholds — the system will never breach your safety floors.' },
-  { tab: 'controls', selector: '.btn-override',             label: 'Pause All Auto-Changes',       desc: 'Instantly freeze all background schedule shifts — VoltFlow holds current device states.' },
-  { tab: 'controls', selector: '.btn-emergency',            label: 'Emergency Boost',              desc: 'Forces EV charger & heat pump to full power — ignores grid tariff for urgent departure.' },
-  { tab: 'controls', selector: '.priority-list',            label: 'Device Priority Stack',        desc: 'Drag to re-rank which appliances receive power first during grid load rationing events.' },
+  { tab: 'controls', selector: '#nav-tab-controls',         label: 'Priorities & Controls',       desc: 'Set your non-negotiable thresholds — the system will never breach your safety floors.' },
+  { tab: 'controls', selector: '.btn-override',             label: 'Pause All Auto-Changes',      desc: 'Instantly freeze all background schedule shifts — VoltFlow holds current device states.' },
+  { tab: 'controls', selector: '.btn-emergency',            label: 'Emergency Boost',             desc: 'Forces EV charger & heat pump to full power — ignores grid tariff for urgent departure.' },
+  { tab: 'controls', selector: '.priority-list',            label: 'Device Priority Stack',       desc: 'Drag to re-rank which appliances receive power first during grid load rationing events.' },
 
   // ── GRID SIGNALS TAB ──────────────────────────────────────
-  { tab: 'grid',     selector: '#nav-tab-grid',             label: 'Grid Intelligence',            desc: 'Live DSO substation signals — tariff level, flexibility rewards and curtailment requests.' },
+  { tab: 'grid',     selector: '#nav-tab-grid',             label: 'Grid Intelligence',           desc: 'Live DSO substation signals — tariff level, flexibility rewards and curtailment requests.' },
+  { tab: 'grid',     selector: '[data-explain-title="Substation Grid Signal Banner"]', label: 'Substation Status Banner', desc: 'Real-time DSO Grid Substation status. Shows active congestion alerts or peak solar rewards.' },
   { tab: 'grid',     selector: '.kpi-card:nth-child(1)',    label: 'Monthly Savings',              desc: '€148.50 saved this month vs flat-rate tariff — by shifting 64% of load to cheap windows.' },
   { tab: 'grid',     selector: '.kpi-card:nth-child(2)',    label: 'Flexibility Cash Earned',      desc: '€42.80 earned from DSO peak-response events — grid paid you to shed load at 18:00–19:00.' },
 
   // ── SAVINGS TAB ───────────────────────────────────────────
   { tab: 'savings',  selector: '#nav-tab-savings',          label: 'Savings & Rewards',            desc: 'Full financial payback — monthly savings, flexibility earnings, CO2 offset and EV guarantee badge.' },
+  { tab: 'savings',  selector: '.kpi-card:nth-child(3)',    label: 'Carbon Offset Tracker',        desc: 'Calculates the environmental impact of your clean energy usage in real time.' },
   { tab: 'savings',  selector: '.glass-card:nth-child(2)',  label: 'EV-Ready Guarantee',           desc: 'System promise: your EV will always be at 85% SOC before your set departure time.' },
 
   // ── PRIVACY TAB ───────────────────────────────────────────
   { tab: 'privacy',  selector: '#nav-tab-privacy',          label: 'Privacy & Data Shield',        desc: 'Zero-knowledge DSO shield — your appliance types and routines never leave your home gateway.' },
+  { tab: 'privacy',  selector: '.switch-toggle:nth-child(2)', label: 'Appliance Data Shield',      desc: 'Instantly toggle whether detailed appliance telemetry is shared with the local grid.' },
   { tab: 'privacy',  selector: '.switch-toggle',            label: 'Granular Consent Toggles',     desc: 'Per-category consent switches — revoke sharing of EV telemetry or appliance data instantly.' },
 
   // ── RELIABILITY TAB ───────────────────────────────────────
