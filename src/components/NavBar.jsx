@@ -81,8 +81,8 @@ export const NavBar = ({ activeTab, setActiveTab }) => {
   return (
     <div style={{
       width: '100%',
-      margin: '0 auto 1.25rem auto',
-      padding: '0 0.5rem',
+      margin: '0 auto',
+      padding: '0.2rem 1.75rem 0.65rem 1.75rem',
       boxSizing: 'border-box'
     }}>
       <nav 

@@ -45,16 +45,18 @@ function AppContent() {
       {/* Floating Antigravity Background Engine */}
       <AntigravityBackground />
 
-      {/* Sticky Glass Top Header */}
-      <Header 
-        onOpenOverrideModal={() => setShowOverrideModal(true)}
-        onOpenEmergencyModal={() => setShowEmergencyModal(true)}
-        onStartDemo={() => setIsDemoMode(true)}
-        isDemoMode={isDemoMode}
-      />
+      {/* Sticky Glass Top Header + Navigation Bar */}
+      <div className="top-sticky-container">
+        <Header 
+          onOpenOverrideModal={() => setShowOverrideModal(true)}
+          onOpenEmergencyModal={() => setShowEmergencyModal(true)}
+          onStartDemo={() => setIsDemoMode(true)}
+          isDemoMode={isDemoMode}
+        />
 
-      {/* 9 Dedicated Tabs Single-Row Navigation Bar */}
-      <NavBar activeTab={activeTab} setActiveTab={handleTabChange} />
+        {/* 9 Dedicated Tabs Single-Row Navigation Bar */}
+        <NavBar activeTab={activeTab} setActiveTab={handleTabChange} />
+      </div>
 
       {/* Primary Dynamic Main Content — Animated Tab View */}
       <main className="main-content">
