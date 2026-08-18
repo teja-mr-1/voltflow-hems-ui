@@ -19,7 +19,8 @@ export const PolymarketScrubberChart = ({
   series1 = { key: 'solarKw', name: 'Solar PV', color: '#059669', unit: ' kW' },
   series2 = { key: 'homeKw', name: 'Home Load', color: '#0284c7', unit: ' kW' },
   series3 = { key: 'gridKw', name: 'Grid / Storage', color: '#e11d48', unit: ' kW' },
-  idPrefix = 'lineChart'
+  idPrefix = 'lineChart',
+  dataExplainTitle
 }) => {
   const [activeIndex, setActiveIndex] = useState(null);
 
@@ -47,7 +48,7 @@ export const PolymarketScrubberChart = ({
   };
 
   return (
-    <div className="glass-card" style={{ padding: '1.4rem' }}>
+    <div className="glass-card" data-explain-title={dataExplainTitle || title} style={{ padding: '1.4rem' }}>
       {/* Header & Interactive Scrubber Pill Header */}
       <div className="card-header" style={{ marginBottom: '1.1rem', flexWrap: 'wrap', gap: '0.8rem' }}>
         <div>

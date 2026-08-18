@@ -36,23 +36,24 @@ const DEMO_STEPS = [
 
   // ── GRID SIGNALS TAB ──────────────────────────────────────
   { tab: 'grid',     selector: '#nav-tab-grid',             label: 'Grid Intelligence',           desc: 'Live updates from your local power grid, showing live electricity prices and grid congestion alerts.' },
-  { tab: 'grid',     selector: '[data-explain-title="Substation Grid Signal Banner"]', label: 'Grid Status Banner', desc: 'Alerts you if the neighborhood power grid is overloaded, and how your home is helping to balance it.' },
-  { tab: 'grid',     selector: '.kpi-card:nth-child(1)',    label: 'Monthly Savings',             desc: 'The exact amount of money you have saved this month by automatically shifting your power usage.' },
-  { tab: 'grid',     selector: '.kpi-card:nth-child(2)',    label: 'Cash Rewards',                desc: 'Extra cash you earned because your home automatically reduced power when the grid was stressed.' },
+  { tab: 'grid',     selector: '[data-explain-title="Substation Grid Signal Banner"]', label: 'Grid Substation Status', desc: 'Alerts you if the neighborhood power grid is overloaded, and how your home is helping to balance it.' },
+  { tab: 'grid',     selector: '[data-explain-title*="Substation Spot Tariff"]', label: 'Substation Tariff & Load Graph', desc: 'Tracks dynamic spot market electricity rates and transformer load in your neighborhood.' },
 
   // ── SAVINGS TAB ───────────────────────────────────────────
   { tab: 'savings',  selector: '#nav-tab-savings',          label: 'Savings & Rewards',           desc: 'Your financial overview — see all your monthly savings, cash rewards, and environmental impact.' },
-  { tab: 'savings',  selector: '.kpi-card:nth-child(3)',    label: 'Carbon Offset Tracker',       desc: 'Calculates the real-world environmental impact of running your home on clean solar energy.' },
-  { tab: 'savings',  selector: '.glass-card:nth-child(2)',  label: 'EV-Ready Guarantee',          desc: 'A system promise guaranteeing that your electric car will be charged and ready before you leave.' },
+  { tab: 'savings',  selector: '.kpi-grid',                 label: 'Financial Savings Summary',   desc: 'Displays your monthly savings, flexibility rewards cash, and avoided CO2 emissions.' },
+  { tab: 'savings',  selector: '.glass-card.col-span-5',    label: 'EV-Ready Guarantee',          desc: 'A system promise guaranteeing that your electric car will be charged and ready before you leave.' },
+  { tab: 'savings',  selector: '[data-explain-title*="Cumulative Energy Savings"]', label: '30-Day Returns Graph', desc: 'An interactive chart showing your accumulated savings and grid payouts building up over 30 days.' },
 
   // ── PRIVACY TAB ───────────────────────────────────────────
   { tab: 'privacy',  selector: '#nav-tab-privacy',          label: 'Privacy & Data',              desc: 'Your personal data shield. VoltFlow ensures your personal habits never leave your home network.' },
-  { tab: 'privacy',  selector: '.switch-toggle:nth-child(2)', label: 'Appliance Data Shield',     desc: 'A simple switch to instantly stop sharing your appliance usage data with the local power company.' },
-  { tab: 'privacy',  selector: '.switch-toggle',            label: 'Consent Toggles',             desc: 'Granular switches giving you full control over exactly what data is shared and what stays private.' },
+  { tab: 'privacy',  selector: '.glass-card:nth-child(1)',  label: 'Zero-Knowledge DSO Shield',   desc: 'Ensures your private daily routines and appliance habits are never sent to external servers.' },
+  { tab: 'privacy',  selector: '.switch-row:nth-child(4) .switch-toggle', label: 'Appliance Data Shield', desc: 'A simple switch to instantly stop sharing your raw appliance power draw curves.' },
 
   // ── RELIABILITY TAB ───────────────────────────────────────
   { tab: 'reliability', selector: '#nav-tab-reliability',   label: 'Reliability & Fallback',      desc: 'Shows how your home will automatically keep running on solar and battery power if the internet goes down.' },
-  { tab: 'reliability', selector: '.glass-card',            label: 'Offline Simulator',           desc: 'Click this to simulate an internet outage and watch the system safely switch to local-only control.' },
+  { tab: 'reliability', selector: '.glass-card:nth-child(1) button', label: 'Offline Outage Simulator', desc: 'Click this to simulate an internet outage and watch the system safely switch to local-only control.' },
+  { tab: 'reliability', selector: '.glass-card.col-span-6', label: 'Household Access Tiers',      desc: 'Assign custom access permissions for family members, guest users, or shared EV drivers.' },
 
   // ── FUTURE LAB TAB ────────────────────────────────────────
   { tab: 'future_lab', selector: '#nav-tab-future_lab',     label: 'Future Energy Lab',           desc: 'A sneak peek at advanced experimental features like letting your EV battery power your house.' },
