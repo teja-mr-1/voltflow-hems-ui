@@ -14,7 +14,8 @@ import {
   Clock,
   Moon,
   Play,
-  Sparkles
+  Sparkles,
+  Sliders
 } from 'lucide-react';
 
 export const Header = ({ onOpenOverrideModal, onOpenEmergencyModal, onStartDemo, isDemoMode }) => {
@@ -37,7 +38,9 @@ export const Header = ({ onOpenOverrideModal, onOpenEmergencyModal, onStartDemo,
     isAutopilotDemo,
     setIsAutopilotDemo,
     isKnowEverythingMode,
-    toggleKnowEverythingMode
+    toggleKnowEverythingMode,
+    isSmartPlanner,
+    setIsSmartPlanner
   } = useEnergy();
 
   const [showNotifications, setShowNotifications] = useState(false);
@@ -67,9 +70,6 @@ export const Header = ({ onOpenOverrideModal, onOpenEmergencyModal, onStartDemo,
           <div className="brand-title">
             VoltFlow <span className="brand-badge">HEMS OS v2.4</span>
           </div>
-          <div style={{ fontSize: '0.725rem', color: 'var(--text-muted)' }}>
-            Smart Energy & Grid Response System
-          </div>
         </div>
       </div>
 
@@ -80,6 +80,65 @@ export const Header = ({ onOpenOverrideModal, onOpenEmergencyModal, onStartDemo,
             <WifiOff size={13} /> Safe Fallback Mode Active
           </div>
         )}
+
+        {/* Smart Control vs Advanced View Segment Switcher */}
+        <div style={{
+          display: 'flex',
+          background: 'rgba(0, 0, 0, 0.04)',
+          padding: '3px',
+          borderRadius: '12px',
+          border: '1px solid rgba(0, 0, 0, 0.08)',
+          boxShadow: 'inset 0 1px 2px rgba(0,0,0,0.04)'
+        }}
+        data-explain-title="Control Mode Switcher"
+        data-explain="Toggle between Smart Hands-Free AI Control and Advanced Technical View."
+        >
+          <button
+            id="btn-mode-smart"
+            onClick={() => setIsSmartPlanner(true)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '9px',
+              border: 'none',
+              background: isSmartPlanner ? '#059669' : 'transparent',
+              color: isSmartPlanner ? '#ffffff' : '#64748b',
+              fontSize: '0.78rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              boxShadow: isSmartPlanner ? '0 2px 8px rgba(5, 150, 105, 0.25)' : 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Sparkles size={13} color={isSmartPlanner ? '#ffffff' : '#059669'} />
+            <span>⚡ Smart Hands-Free</span>
+          </button>
+
+          <button
+            id="btn-mode-advanced"
+            onClick={() => setIsSmartPlanner(false)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              padding: '0.35rem 0.75rem',
+              borderRadius: '9px',
+              border: 'none',
+              background: !isSmartPlanner ? '#0f172a' : 'transparent',
+              color: !isSmartPlanner ? '#ffffff' : '#64748b',
+              fontSize: '0.78rem',
+              fontWeight: 750,
+              cursor: 'pointer',
+              boxShadow: !isSmartPlanner ? '0 2px 8px rgba(15, 23, 42, 0.2)' : 'none',
+              transition: 'all 0.15s ease'
+            }}
+          >
+            <Sliders size={13} color={!isSmartPlanner ? '#ffffff' : '#64748b'} />
+            <span>⚙️ Advanced View</span>
+          </button>
+        </div>
 
         {/* Traffic Light Grid Condition Pill */}
         <div 
@@ -96,54 +155,6 @@ export const Header = ({ onOpenOverrideModal, onOpenEmergencyModal, onStartDemo,
             {gridStatus === 'red' && 'Local Grid: High Congestion'}
           </span>
           <span style={{ opacity: 0.6, fontSize: '0.7rem' }}>(Click to cycle)</span>
-        </div>
-
-        {/* Global Pause Override Button */}
-        <button 
-          className={`btn-override ${isGlobalPaused ? 'active' : ''}`}
-          onClick={onOpenOverrideModal}
-          data-explain-title="Pause Auto-Changes"
-          data-explain="Temporarily freezes automatic settings for 1 hour."
-        >
-          <Pause size={14} />
-          {isGlobalPaused ? `Paused (${formatTimer(pauseTimer)})` : 'Pause Auto-Changes'}
-        </button>
-
-        {/* Emergency Boost Button */}
-        <button 
-          className={`btn-emergency ${isEmergencyBoost ? 'active' : ''}`}
-          onClick={onOpenEmergencyModal}
-          data-explain-title="Emergency Boost"
-          data-explain="Supercharges EV & heating immediately at full power."
-        >
-          <Flame size={14} />
-          {isEmergencyBoost ? `Boost Active (${formatTimer(boostTimer)})` : 'Emergency Boost'}
-        </button>
-
-        {/* Mode Selector Pill */}
-        <div 
-          className="pill-badge green" 
-          style={{ padding: '6px 12px', fontSize: '0.78rem' }}
-          data-explain-title="System Mode"
-          data-explain="Runs energy optimization automatically or asks for approval."
-        >
-          <ShieldCheck size={13} />
-          <span>Mode: {controlMode === 'auto' ? 'Full Auto' : controlMode === 'approval' ? 'Approval-Based' : 'Recommendations'}</span>
-        </div>
-
-        {/* Household Profile Switcher */}
-        <div 
-          className="profile-pill" 
-          onClick={() => {
-            const profiles = ['family', 'shared_ev', 'landlord'];
-            const nextIdx = (profiles.indexOf(userProfile) + 1) % profiles.length;
-            setUserProfile(profiles[nextIdx]);
-          }}
-          data-explain-title="Home Profile"
-          data-explain="Switches home rules between Family, EV Driver, or Guest."
-        >
-          <User size={14} />
-          <span>Profile: {userProfile === 'family' ? 'Primary Family' : userProfile === 'shared_ev' ? 'Shared EV User' : 'Landlord / Guest'}</span>
         </div>
 
         {/* ▶ Auto Demo Mode Button */}

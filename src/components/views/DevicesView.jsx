@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 
 export const DevicesView = ({ onOpenAddDeviceWizard }) => {
-  const { devices, setDevices, addNotification, isEmergencyBoost, toggleEmergencyBoost, triggerSignificance } = useEnergy();
+  const { devices, setDevices, addNotification, isEmergencyBoost, toggleEmergencyBoost, triggerSignificance, isSmartPlanner } = useEnergy();
   const [selectedDevice, setSelectedDevice] = useState(null);
 
   const handleSimulateEmergencyBoost = () => {
@@ -66,41 +66,95 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
 
       {/* Top Header Action Bar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <h2 style={{ fontSize: '1.4rem', color: '#0f172a' }}>Connected Hardware Fleet</h2>
+        <h2 style={{ fontSize: '1.4rem', color: '#0f172a' }}>
+          {isSmartPlanner ? 'Your Home Appliances' : 'Connected Hardware Fleet'}
+        </h2>
 
-        <button 
-          className="btn-primary" 
-          onClick={onOpenAddDeviceWizard}
-          data-explain-title="Connect Device Wizard"
-          data-explain="Pairs new smart appliances, EV chargers, or solar inverters to VoltFlow."
-        >
-          <Plus size={16} /> Connect New Device
-        </button>
+        {/* Commissioning tools only in Advanced View */}
+        {!isSmartPlanner && (
+          <button 
+            className="btn-primary" 
+            onClick={onOpenAddDeviceWizard}
+            data-explain-title="Connect Device Wizard"
+            data-explain="Pairs new smart appliances, EV chargers, or solar inverters to VoltFlow."
+          >
+            <Plus size={16} /> Connect New Device
+          </button>
+        )}
       </div>
 
       {/* Connection Loss / Fault Warning Banner */}
       {offlineDevices.length > 0 && (
-        <div className="alert-banner warning">
-          <AlertTriangle size={20} />
+        <div className={`alert-banner ${isSmartPlanner ? 'info' : 'warning'}`} style={{
+          background: isSmartPlanner ? 'rgba(2, 132, 199, 0.08)' : 'rgba(245, 158, 11, 0.1)',
+          borderColor: isSmartPlanner ? 'rgba(2, 132, 199, 0.3)' : 'rgba(245, 158, 11, 0.4)'
+        }}>
+          <AlertTriangle size={20} color={isSmartPlanner ? '#0284c7' : '#d97706'} />
           <div style={{ flex: 1 }}>
-            <strong>Device Loss Notification: {offlineDevices.length} Hardware Asset Offline</strong>
-            <div style={{ fontSize: '0.78rem', marginTop: '2px' }}>
-              {offlineDevices.map(d => d.name).join(', ')} failed to respond to heartbeat ping. System operating under safe fallback routines.
+            <strong style={{ color: isSmartPlanner ? '#0369a1' : '#b45309' }}>
+              {isSmartPlanner 
+                ? `1 Appliance Needs Reconnection: ${offlineDevices[0].name}`
+                : `Device Loss Notification: ${offlineDevices.length} Hardware Asset Offline`}
+            </strong>
+            <div style={{ fontSize: '0.78rem', marginTop: '2px', color: isSmartPlanner ? '#334155' : '#475569' }}>
+              {isSmartPlanner 
+                ? `Lost Wi-Fi signal. VoltFlow is maintaining home heating & EV charging safely in the background.`
+                : `${offlineDevices.map(d => d.name).join(', ')} failed to respond to heartbeat ping. System operating under safe fallback routines.`}
             </div>
           </div>
           <button 
             className="btn-secondary"
-            style={{ fontSize: '0.75rem', padding: '4px 10px', display: 'flex', alignItems: 'center', gap: '4px' }}
+            style={{ fontSize: '0.75rem', padding: '5px 12px', display: 'flex', alignItems: 'center', gap: '5px', fontWeight: 700 }}
             onClick={() => handleReconnect(offlineDevices[0].id)}
             data-explain-title="Reconnect Device"
             data-explain="Sends Wi-Fi ping to reconnect offline hardware."
           >
-            <RefreshCw size={13} /> Retry Connection
+            <RefreshCw size={13} /> {isSmartPlanner ? '🔄 Reconnect Wi-Fi' : 'Retry Connection'}
           </button>
         </div>
       )}
 
-      {/* Devices Fleet Grid Cards */}
+      {/* SMART MODE: Clean live-status list — "What is running right now?" */}
+      {isSmartPlanner ? (
+        <div data-demo="smart-device-list" style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+          {devices.map((device) => {
+            const isOffline = device.status === 'offline';
+            const getStatusInfo = () => {
+              if (isOffline) return { label: '⚠️ Wi-Fi Disconnected', color: '#e11d48', dotColor: '#e11d48' };
+              if (device.category === 'EV Charger') return { label: 'Charging overnight — ready by 07:30 AM', color: '#059669', dotColor: '#059669' };
+              if (device.category === 'Home Battery') return { label: `Powering home — ${device.batterySoc || 78}% stored`, color: '#0284c7', dotColor: '#0284c7' };
+              if (device.category === 'Solar PV') return { label: 'Generating clean solar power', color: '#d97706', dotColor: '#d97706' };
+              if (device.category === 'HVAC / Heating') return { label: `Maintaining ${device.currentTemp || '20.8'}°C indoor comfort`, color: '#0284c7', dotColor: '#0284c7' };
+              return { label: 'Scheduled & running automatically', color: '#059669', dotColor: '#059669' };
+            };
+            const status = getStatusInfo();
+            return (
+              <div key={device.id} style={{
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                padding: '1rem 1.25rem', background: '#ffffff', borderRadius: '14px',
+                border: isOffline ? '1px solid rgba(225,29,72,0.25)' : '1px solid rgba(0,0,0,0.07)',
+                gap: '1rem'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                  <div style={{ width: 36, height: 36, borderRadius: '10px', background: 'rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    {getDeviceIcon(device.category)}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a' }}>{device.name}</div>
+                    <div style={{ fontSize: '0.8rem', color: status.color, fontWeight: 600, marginTop: '2px' }}>{status.label}</div>
+                  </div>
+                </div>
+                <div style={{
+                  width: 10, height: 10, borderRadius: '50%',
+                  background: status.dotColor, flexShrink: 0,
+                  boxShadow: `0 0 6px ${status.dotColor}`
+                }} />
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+      /* ADVANCED MODE: Full interactive device-card grid */
       <div className="device-grid">
         {devices.map((device) => {
           const isOffline = device.status === 'offline';
@@ -111,68 +165,47 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
             <div 
               key={device.id} 
               className="device-card"
-              data-explain-title={device.name}
-              data-explain={
-                device.category === 'EV Charger' ? 'Manages electric vehicle charge speed and battery target.' :
-                device.category === 'Home Battery' ? 'Stores extra solar energy to power your house at night.' :
-                device.category === 'Solar PV' ? 'Rooftop solar panels producing free clean electricity.' :
-                'Controls home heating power and water pre-heat temperature.'
-              }
               style={{
-                position: 'relative',
-                overflow: 'hidden',
+                position: 'relative', overflow: 'hidden',
                 border: isBoosting ? '2px solid #d97706' : isOffline ? '1px solid rgba(225,29,72,0.3)' : '1px solid rgba(0,0,0,0.08)',
                 boxShadow: isBoosting ? '0 0 20px rgba(217, 119, 6, 0.25)' : '0 4px 12px rgba(0,0,0,0.03)',
-                background: '#ffffff',
-                transition: 'all 0.3s ease'
+                background: '#ffffff', transition: 'all 0.3s ease'
               }}
             >
-              {/* Fluid Fill Progress Level Background */}
+              {/* Fluid Fill Background */}
               <div style={{
-                position: 'absolute',
-                bottom: 0,
-                left: 0,
-                right: 0,
+                position: 'absolute', bottom: 0, left: 0, right: 0,
                 height: `${fillPercentage}%`,
                 background: isBoosting 
-                  ? 'linear-gradient(180deg, rgba(245, 158, 11, 0.15), rgba(245, 158, 11, 0.04))' 
+                  ? 'linear-gradient(180deg, rgba(245,158,11,0.15), rgba(245,158,11,0.04))' 
                   : device.powerKw > 0 
-                  ? 'linear-gradient(180deg, rgba(5, 150, 105, 0.12), rgba(5, 150, 105, 0.02))' 
+                  ? 'linear-gradient(180deg, rgba(5,150,105,0.12), rgba(5,150,105,0.02))' 
                   : 'transparent',
-                pointerEvents: 'none',
-                transition: 'height 0.8s ease-in-out',
-                zIndex: 0
+                pointerEvents: 'none', transition: 'height 0.8s ease-in-out', zIndex: 0
               }} />
 
               <div style={{ position: 'relative', zIndex: 1, display: 'flex', flexDirection: 'column', gap: '0.85rem' }}>
                 <div className="device-card-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', minHeight: '44px' }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', flex: 1, minWidth: 0, paddingRight: '0.5rem' }}>
-                    <div className="device-icon-box" style={{ flexShrink: 0, background: isBoosting ? 'rgba(217, 119, 6, 0.15)' : 'rgba(0,0,0,0.04)' }}>
+                    <div className="device-icon-box" style={{ flexShrink: 0, background: isBoosting ? 'rgba(217,119,6,0.15)' : 'rgba(0,0,0,0.04)' }}>
                       {getDeviceIcon(device.category)}
                     </div>
                     <div style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', justifyContent: 'center', minHeight: '40px' }}>
-                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: '1.2', display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{device.name}</div>
+                      <div style={{ fontSize: '0.92rem', fontWeight: 700, color: '#0f172a', lineHeight: '1.2' }}>{device.name}</div>
                       <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '2px' }}>{device.category}</div>
                     </div>
                   </div>
-
-                  {/* Instant Power Switch */}
+                  {/* Manual Power Toggle — Advanced Mode Only */}
                   <button 
                     onClick={() => toggleDevicePower(device.id)}
                     title="Toggle device ON/OFF"
                     style={{
-                      width: 36,
-                      height: 36,
-                      flexShrink: 0,
-                      borderRadius: '50%',
-                      border: 'none',
+                      width: 36, height: 36, flexShrink: 0, borderRadius: '50%', border: 'none',
                       cursor: isOffline ? 'not-allowed' : 'pointer',
                       background: device.powerKw > 0 ? '#059669' : '#e2e8f0',
                       color: device.powerKw > 0 ? '#ffffff' : '#64748b',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      boxShadow: device.powerKw > 0 ? '0 2px 8px rgba(5, 150, 105, 0.3)' : 'none',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0,
+                      boxShadow: device.powerKw > 0 ? '0 2px 8px rgba(5,150,105,0.3)' : 'none',
                       transition: 'all 0.2s ease'
                     }}
                     disabled={isOffline}
@@ -181,24 +214,14 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
                   </button>
                 </div>
 
-                {/* Telemetry Metrics Grid */}
-                <div style={{ 
-                  background: 'rgba(255, 255, 255, 0.85)', 
-                  borderRadius: '10px', 
-                  padding: '0.75rem',
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '0.65rem',
-                  fontSize: '0.88rem',
-                  border: '1px solid rgba(0,0,0,0.06)'
-                }}>
+                {/* Technical Telemetry Grid */}
+                <div style={{ background: 'rgba(255,255,255,0.85)', borderRadius: '10px', padding: '0.75rem', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.65rem', fontSize: '0.88rem', border: '1px solid rgba(0,0,0,0.06)' }}>
                   <div>
                     <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Active Power</span>
                     <span style={{ fontWeight: 800, fontSize: '1.05rem', color: isBoosting ? '#d97706' : device.powerKw > 0 ? '#047857' : '#64748b' }}>
                       {device.powerKw} kW {isBoosting && '🚀'}
                     </span>
                   </div>
-
                   <div>
                     <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Status</span>
                     <span className={`device-status-badge ${isOffline ? 'offline' : device.powerKw > 0 ? 'online' : 'scheduled'}`}>
@@ -206,7 +229,6 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
                       <span>{device.status.toUpperCase()}</span>
                     </span>
                   </div>
-
                   {device.batterySoc !== undefined && (
                     <div style={{ gridColumn: 'span 2' }}>
                       <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.75rem', color: '#64748b', fontWeight: 600 }}>
@@ -214,33 +236,23 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
                         <span style={{ color: '#0284c7', fontWeight: 800 }}>{device.batterySoc}% (Target 85%)</span>
                       </div>
                       <div style={{ height: '8px', background: 'rgba(0,0,0,0.08)', borderRadius: '4px', marginTop: '4px', overflow: 'hidden' }}>
-                        <div style={{ 
-                          height: '100%', 
-                          width: `${device.batterySoc}%`, 
-                          background: isBoosting ? 'linear-gradient(90deg, #d97706, #f59e0b)' : '#0284c7', 
-                          borderRadius: '4px',
-                          transition: 'width 0.4s ease'
-                        }} />
+                        <div style={{ height: '100%', width: `${device.batterySoc}%`, background: isBoosting ? 'linear-gradient(90deg, #d97706, #f59e0b)' : '#0284c7', borderRadius: '4px', transition: 'width 0.4s ease' }} />
                       </div>
                     </div>
                   )}
-
                   {device.currentTemp !== undefined && (
                     <div>
                       <span style={{ color: '#64748b', display: 'block', fontSize: '0.75rem', fontWeight: 600 }}>Indoor Temp</span>
-                      <span style={{ fontWeight: 700, color: '#d97706' }}>
-                        {device.currentTemp}°C
-                      </span>
+                      <span style={{ fontWeight: 700, color: '#d97706' }}>{device.currentTemp}°C</span>
                     </div>
                   )}
                 </div>
 
-                {/* Footer Ping info */}
+                {/* Footer: Ping + Configure */}
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '0.72rem', color: '#64748b' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <Clock size={12} /> Ping: {device.lastPing}
                   </span>
-
                   <button 
                     className="btn-secondary" 
                     style={{ padding: '3px 8px', fontSize: '0.72rem', display: 'flex', alignItems: 'center', gap: '4px' }}
@@ -254,6 +266,7 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
           );
         })}
       </div>
+      )}
 
       {/* Device Config Detail Modal */}
       {selectedDevice && (
@@ -264,7 +277,6 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
                 <Settings size={20} color="#059669" />
                 <div>
                   <div style={{ fontWeight: 700, fontSize: '1.1rem' }}>{selectedDevice.name}</div>
-                  <div style={{ fontSize: '0.75rem', color: '#64748b' }}>Device Config & Telemetry Limits</div>
                 </div>
               </div>
               <button className="close-btn" onClick={() => setSelectedDevice(null)}>✕</button>
@@ -279,7 +291,6 @@ export const DevicesView = ({ onOpenAddDeviceWizard }) => {
               <div className="switch-row">
                 <div>
                   <div className="switch-label-title">Allow Automatic Smart Scheduling</div>
-                  <div className="switch-label-desc">Let HEMS adjust operational hours based on grid tariff</div>
                 </div>
                 <div className="switch-toggle active"><div className="switch-handle" /></div>
               </div>

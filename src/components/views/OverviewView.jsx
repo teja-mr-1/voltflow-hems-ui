@@ -10,7 +10,8 @@ import {
   ShieldCheck,
   Flame,
   Pause,
-  TrendingUp
+  TrendingUp,
+  Sparkles
 } from 'lucide-react';
 import { 
   ResponsiveContainer, 
@@ -23,7 +24,18 @@ import { PolymarketScrubberChart } from '../PolymarketScrubberChart';
 import { generateSolarGridHeartbeatData } from '../../utils/telemetryDataGenerator';
 
 export const OverviewView = () => {
-  const { devices, viewMode, gridStatus, setGridStatus, triggerSignificance } = useEnergy();
+  const { 
+    devices, 
+    viewMode, 
+    gridStatus, 
+    setGridStatus, 
+    triggerSignificance, 
+    isSmartPlanner,
+    setIsSmartPlanner,
+    isEmergencyBoost,
+    toggleEmergencyBoost,
+    addNotification
+  } = useEnergy();
 
   const handleSimulateGridCongestion = () => {
     if (gridStatus === 'green') {
@@ -88,64 +100,124 @@ export const OverviewView = () => {
   // ----------------------------------------------------
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
-      {/* Top 4 Live Telemetry Widgets */}
-      <div className="kpi-grid">
-        <div 
-          className="kpi-card solar"
-          data-explain-title="Solar Panels"
-          data-explain="Rooftop solar producing free clean power for your house."
-        >
-          <div className="kpi-icon-wrap"><Sun size={24} /></div>
-          <div>
-            <div className="kpi-label">Solar Microinverter PV</div>
-            <div className="kpi-val" style={{ color: '#d97706' }}>{solarPower} kW</div>
-            <div className="kpi-subtext">Peak Today: 6.4 kW</div>
-          </div>
-        </div>
+      {/* SMART HANDS-FREE CITIZEN VIEW */}
+      {isSmartPlanner ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
-        <div 
-          className="kpi-card battery"
-          data-explain-title="Home Battery"
-          data-explain="Stores extra solar energy to power your house at night."
-        >
-          <div className="kpi-icon-wrap"><Battery size={24} /></div>
-          <div>
-            <div className="kpi-label">Powerwall Storage</div>
-            <div className="kpi-val" style={{ color: '#0284c7' }}>{batterySoc}% ({batteryPower} kW)</div>
-            <div className="kpi-subtext">Discharging • 13.5 kWh</div>
-          </div>
-        </div>
-
-        <div 
-          className="kpi-card home"
-          data-explain-title="Home Power Use"
-          data-explain="Current electricity being used right now by your appliances."
-        >
-          <div className="kpi-icon-wrap"><Home size={24} /></div>
-          <div>
-            <div className="kpi-label">Active Power Draw</div>
-            <div className="kpi-val" style={{ color: '#047857' }}>{totalHouseholdDraw} kW</div>
-            <div className="kpi-subtext">EV + HVAC Active</div>
-          </div>
-        </div>
-
-        <div 
-          className="kpi-card grid"
-          data-explain-title="Grid Power Flow"
-          data-explain="Shows if your home is selling solar power or buying from grid."
-        >
-          <div className="kpi-icon-wrap"><Zap size={24} /></div>
-          <div>
-            <div className="kpi-label">Net Substation Flow</div>
-            <div className="kpi-val" style={{ color: isGridExporting ? '#047857' : '#6d28d9' }}>
-              {isGridExporting ? `Exporting ${Math.abs(netGridFlow)} kW` : `Importing ${netGridFlow} kW`}
+          {/* Hero Headline */}
+          <div className="glass-card" data-demo="smart-overview-hero" style={{
+            background: 'linear-gradient(135deg, rgba(255,255,255,0.98) 0%, rgba(240,253,244,0.95) 100%)',
+            padding: '1.75rem 2rem', borderRadius: '20px',
+            border: '1.5px solid rgba(5,150,105,0.25)',
+            boxShadow: '0 8px 30px rgba(5,150,105,0.08)'
+          }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: '6px',
+                  background: 'rgba(5,150,105,0.12)', color: '#047857',
+                  padding: '4px 12px', borderRadius: '20px',
+                  fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase',
+                  letterSpacing: '0.5px', marginBottom: '0.75rem'
+                }}>
+                  <Sparkles size={14} color="#059669" /> Smart Planner Active
+                </div>
+                <div style={{ fontSize: '1.6rem', fontWeight: 800, color: '#0f172a', lineHeight: 1.25 }}>
+                  Your home is running on <span style={{ color: '#059669' }}>92% clean energy</span> right now.
+                </div>
+                <div style={{ fontSize: '0.95rem', color: '#64748b', marginTop: '0.4rem', fontWeight: 500 }}>
+                  Automated grid balancing has saved you <strong style={{ color: '#047857' }}>€4.80 today</strong> by shifting EV charging & heat pump cycles to low-cost spot dips.
+                </div>
+              </div>
+              <div className="pill-badge green" style={{ padding: '6px 14px', fontSize: '0.8rem' }}>
+                <Sparkles size={14} /> All Systems Autonomous
+              </div>
             </div>
-            <div className="kpi-subtext">{isGridExporting ? 'Feed-in: €0.14/kWh' : 'Tariff: €0.08/kWh'}</div>
           </div>
-        </div>
-      </div>
 
-      {/* Vector Flow Matrix & Appliance Pie Share */}
+          {/* 4 Today's Outcome Stats — read-only, no controls */}
+          <div data-demo="smart-outcome-stats" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1rem' }}>
+            {[
+              { icon: Sun, color: '#d97706', bg: 'rgba(217,119,6,0.1)', label: 'Solar Generated Today', value: '28.4 kWh', sub: 'Peak 6.2 kW at 12:30 PM' },
+              { icon: ShieldCheck, color: '#059669', bg: 'rgba(5,150,105,0.1)', label: 'Money Saved Today', value: '€4.80', sub: 'vs flat-rate tariff billing' },
+              { icon: BarChart3, color: '#0284c7', bg: 'rgba(2,132,199,0.1)', label: 'Clean Energy Share', value: '92%', sub: 'Self-solar + stored battery' },
+              { icon: Home, color: '#7c3aed', bg: 'rgba(124,58,237,0.1)', label: 'Grid Imported Today', value: '3.1 kWh', sub: 'Only during morning ramp-up' },
+            ].map((stat, i) => {
+              const Icon = stat.icon;
+              return (
+                <div key={i} className="glass-card" style={{ padding: '1.25rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.07)' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '0.75rem' }}>
+                    <div style={{ width: 38, height: 38, borderRadius: '10px', background: stat.bg, color: stat.color, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                      <Icon size={20} />
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700 }}>{stat.label}</div>
+                  </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 800, color: stat.color }}>{stat.value}</div>
+                  <div style={{ fontSize: '0.75rem', color: '#94a3b8', marginTop: '2px' }}>{stat.sub}</div>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Today's Grid Conditions — read-only */}
+          <div className="glass-card" data-demo="smart-grid-calm" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>TODAY'S GRID CONDITIONS</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#047857' }}>🟢 Grid Calm — Optimal Conditions All Day</div>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '4px' }}>Low tariff window 01:00–06:00 AM. VoltFlow charged your EV in full at €0.08/kWh.</div>
+              </div>
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: '0.78rem', color: '#64748b', fontWeight: 600 }}>Peak Tariff Today</div>
+                <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#d97706' }}>€0.38/kWh at 18:00</div>
+                <div style={{ fontSize: '0.75rem', color: '#94a3b8' }}>All loads shifted before peak ✓</div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      ) : (
+        /* ADVANCED TECHNICAL TELEMETRY VIEW */
+        <>
+          {/* ⚙️ ADVANCED: Direct Device Quick-Actions (unique to Overview) */}
+          <div className="glass-card" data-demo="adv-device-actions" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', border: '1.5px solid rgba(5,150,105,0.2)', background: 'linear-gradient(135deg, #ffffff, #f8faff)' }}>
+            <div className="action-cell-label" style={{ marginBottom: '0.75rem' }}>
+              ⚙️ Live Device Quick-Actions
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.75rem' }}>
+
+              {/* Force EV Charge Now */}
+              <div className="action-cell">
+                <div className="action-cell-label">EV — Tesla Model Y</div>
+                <div className="action-cell-sub">Currently: Scheduled 01:00 AM</div>
+                <button className="btn-action emerald" onClick={() => addNotification('warning', 'EV Force Charging', 'Bypassed schedule — charging Tesla at 7.2 kW max rate right now.')}>
+                  ⚡ Force Charge Now
+                </button>
+              </div>
+
+              {/* Manual Battery Mode */}
+              <div className="action-cell" style={{ flex: '1 1 200px' }}>
+                <div className="action-cell-label">Powerwall — Battery Mode</div>
+                <div style={{ display: 'flex', gap: '5px', marginTop: '8px' }}>
+                  <button className="btn-action cyan" style={{ fontSize: '0.7rem' }} onClick={() => addNotification('info', 'Battery: Charge', 'Powerwall set to force-charge mode.')}>↑ Charge</button>
+                  <button className="btn-action neutral" style={{ fontSize: '0.7rem' }} onClick={() => addNotification('info', 'Battery: Hold', 'Powerwall holding current charge level.')}>⏸ Hold</button>
+                  <button className="btn-action violet" style={{ fontSize: '0.7rem' }} onClick={() => addNotification('info', 'Battery: Export', 'Powerwall exporting to grid.')}>↓ Export</button>
+                </div>
+              </div>
+
+              {/* Suspend Running Appliance */}
+              <div className="action-cell">
+                <div className="action-cell-label">Washer — Currently Running</div>
+                <div className="action-cell-sub">Eco Wash · 38 min remaining</div>
+                <button className="btn-action amber" onClick={() => addNotification('warning', 'Washer Suspended', 'Bosch washer cycle paused manually. Will resume when you allow it.')}>
+                  ⏸ Suspend Cycle Now
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          {/* Vector Flow Matrix & Appliance Pie Share */}
       <div className="grid-cols-12">
         <div 
           className="glass-card col-span-7"
@@ -156,7 +228,7 @@ export const OverviewView = () => {
             <div className="card-title" style={{ color: '#0f172a' }}>
               <Zap size={18} color="#059669" /> Vector Power Flow Matrix
             </div>
-            <div className="pill-badge green">Pro Telemetry Sync</div>
+            <div className="pill-badge green">Manual Telemetry</div>
           </div>
 
           <div className="flow-diagram-container" style={{ background: 'linear-gradient(135deg, #faf8f4, #f1ece1)', padding: '1.25rem', borderRadius: '20px' }}>
@@ -261,6 +333,7 @@ export const OverviewView = () => {
 
         <div 
           className="glass-card col-span-5"
+          data-demo="adv-power-share"
           data-explain-title="Power Usage Share"
           data-explain="Pie chart showing which appliances use the most electricity."
         >
@@ -304,7 +377,6 @@ export const OverviewView = () => {
       >
         <PolymarketScrubberChart
           title="24-Hour Solar PV, Home Demand & Powerwall Storage Telemetry"
-          subtitle="Real-time multi-channel power telemetry and storage flow"
           icon={TrendingUp}
           data={generateSolarGridHeartbeatData()}
           series1={{ key: 'solarKw', name: 'Solar PV', color: '#d97706', unit: ' kW' }}
@@ -313,6 +385,8 @@ export const OverviewView = () => {
           idPrefix="overviewScrubber"
         />
       </div>
+        </>
+      )}
     </div>
   );
 };

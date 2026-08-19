@@ -48,24 +48,31 @@ export const ReliabilityView = () => {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
         <h2 style={{ fontSize: '1.4rem' }}>Reliability, Safe Fallback & Household Support</h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Fail-safe autonomous operation during internet dropouts, multi-user household profiles, and feedback support
-        </p>
       </div>
 
       {/* Network Disconnection / Internet Loss Safe Fallback Simulator Banner */}
-      <div className="glass-card" style={{
-        background: isOfflineFallbackMode ? 'rgba(217, 119, 6, 0.1)' : '#ffffff',
-        border: `1px solid ${isOfflineFallbackMode ? 'rgba(217, 119, 6, 0.4)' : 'rgba(0, 0, 0, 0.1)'}`
-      }}>
+      <div 
+        className="glass-card" 
+        data-demo="reliability-offline-card" 
+        data-explain-title="Offline Outage Simulator"
+        data-explain="Test how VoltFlow protects your home during internet or power network outages using local hardware memory."
+        style={{
+          background: isOfflineFallbackMode ? 'rgba(217, 119, 6, 0.1)' : '#ffffff',
+          border: `1px solid ${isOfflineFallbackMode ? 'rgba(217, 119, 6, 0.4)' : 'rgba(0, 0, 0, 0.1)'}`
+        }}
+      >
         <div className="card-header">
           <div>
             <div className="card-title" style={{ color: isOfflineFallbackMode ? '#b45309' : '#0f172a' }}>
               <WifiOff size={20} /> Autonomous Offline Fallback Simulator
             </div>
-            <div className="card-subtitle">Test how VoltFlow operates when internet or grid signals are lost</div>
           </div>
-          <button className={`btn-secondary ${isOfflineFallbackMode ? 'active' : ''}`} onClick={toggleFallbackSimulator}>
+          <button 
+            className={`btn-secondary ${isOfflineFallbackMode ? 'active' : ''}`} 
+            onClick={toggleFallbackSimulator}
+            data-explain-title="Toggle Internet Loss Test"
+            data-explain="Simulates an internet disconnect to prove your home stays warm and battery continues charging safely."
+          >
             {isOfflineFallbackMode ? 'Restore Normal Connection' : 'Test Internet / Signal Loss Fallback'}
           </button>
         </div>
@@ -87,24 +94,30 @@ export const ReliabilityView = () => {
       {/* Main Grid: Multi-User Profiles & Problem Feedback Widget */}
       <div className="grid-cols-12">
         {/* Household Multi-User Profiles */}
-        <div className="glass-card col-span-6">
+        <div 
+          className="glass-card col-span-6" 
+          data-demo="reliability-profiles-card"
+          data-explain-title="Household Access Tiers"
+          data-explain="Assign custom permission levels for homeowners, family members, shared EV drivers, or renting tenants."
+        >
           <div className="card-header">
             <div>
               <div className="card-title">
                 <Users size={18} color="var(--primary-emerald)" /> Household Profiles & Access Tiers
               </div>
-              <div className="card-subtitle">Manage shared permissions for multiple EV drivers and family members</div>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
             {[
-              { id: 'family', name: 'Primary Resident / Admin', role: 'Full Control', desc: 'Full access to override settings, privacy switches, and budgets.' },
-              { id: 'shared_ev', name: 'Shared EV Driver Profile', role: 'EV Charging Only', desc: 'Can set departure deadlines and view charging status.' },
-              { id: 'landlord', name: 'Guest / Tenant View', role: 'Read Only', desc: 'View live consumption and thermal comfort setting.' },
+              { id: 'family', name: 'Primary Resident / Admin', role: 'Full Control', explain: 'Full access to all hardware limits, savings payouts, and automated rules.' },
+              { id: 'shared_ev', name: 'Shared EV Driver Profile', role: 'EV Charging Only', explain: 'Can plug in and set EV departure times without accessing heating or battery controls.' },
+              { id: 'landlord', name: 'Guest / Tenant View', role: 'Read Only', explain: 'Read-only dashboard view showing current temperatures and energy usage.' },
             ].map(profile => (
               <div 
                 key={profile.id}
+                data-explain-title={profile.name}
+                data-explain={profile.explain}
                 onClick={() => setUserProfile(profile.id)}
                 style={{
                   padding: '0.85rem',
@@ -118,20 +131,22 @@ export const ReliabilityView = () => {
                   <span style={{ color: userProfile === profile.id ? '#047857' : '#0f172a' }}>{profile.name}</span>
                   <span className="pill-badge green">{profile.role}</span>
                 </div>
-                <div style={{ fontSize: '0.78rem', color: '#475569', marginTop: '3px' }}>{profile.desc}</div>
               </div>
             ))}
           </div>
         </div>
 
         {/* Feedback & Schedule Problem Report Widget */}
-        <div className="glass-card col-span-6">
+        <div 
+          className="glass-card col-span-6"
+          data-explain-title="Schedule Feedback Reporter"
+          data-explain="Report unexpected schedule conflicts or comfort issues so VoltFlow AI can improve your future routine."
+        >
           <div className="card-header">
             <div>
               <div className="card-title">
                 <MessageSquare size={18} color="var(--battery-cyan)" /> Schedule Feedback & Problem Reporting
               </div>
-              <div className="card-subtitle">Report why an automatic change did not fit your routine</div>
             </div>
           </div>
 
@@ -157,7 +172,13 @@ export const ReliabilityView = () => {
               />
             </div>
 
-            <button className="btn-primary" type="submit" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}>
+            <button 
+              className="btn-primary" 
+              type="submit" 
+              data-explain-title="Submit Routine Feedback"
+              data-explain="Sends your report to the local learning engine to adapt tomorrow's schedule."
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
+            >
               <Send size={15} /> {feedbackSubmitted ? 'Feedback Sent!' : 'Submit Schedule Report'}
             </button>
           </form>

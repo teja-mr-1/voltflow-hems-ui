@@ -9,6 +9,16 @@ export const EnergyProvider = ({ children }) => {
   // View Density Mode ('essential' default serene mode | 'pro' full telemetry)
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('voltflow_viewMode') || 'essential');
 
+  // Master Control Mode: true = Smart Autonomous Planner (Ultra-Minimal) | false = Manual Override
+  const [isSmartPlanner, setIsSmartPlanner] = useState(() => {
+    const saved = localStorage.getItem('voltflow_isSmartPlanner');
+    return saved !== null ? JSON.parse(saved) : true;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('voltflow_isSmartPlanner', JSON.stringify(isSmartPlanner));
+  }, [isSmartPlanner]);
+
   // Sync viewMode to localStorage
   useEffect(() => {
     localStorage.setItem('voltflow_viewMode', viewMode);
@@ -37,6 +47,7 @@ export const EnergyProvider = ({ children }) => {
       departureTime: '07:30',
       targetTemp: 21.0,
       tempFlexibility: 1.5,
+      flexGridMode: true,
       priorityOrder: ['ev_charger', 'battery_storage', 'heat_pump', 'smart_washer'],
     };
   });
@@ -435,6 +446,8 @@ export const EnergyProvider = ({ children }) => {
         triggerSignificance,
         isKnowEverythingMode,
         toggleKnowEverythingMode,
+        isSmartPlanner,
+        setIsSmartPlanner,
       }}
     >
       {children}

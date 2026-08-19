@@ -26,12 +26,28 @@ import {
 } from 'recharts';
 
 export const SchedulingView = ({ onOpenDeadlineModal }) => {
-  const { priceForecast, userLimits, setUserLimits, addAuditLog, addNotification, viewMode, triggerSignificance } = useEnergy();
+  const { priceForecast, userLimits, setUserLimits, addAuditLog, addNotification, viewMode, triggerSignificance, isSmartPlanner } = useEnergy();
   
   // Main view mode: 'TODAY' | 'TOMORROW' | 'WEEK'
   const [mainMode, setMainMode] = useState('TODAY');
   const [selectedDayKey, setSelectedDayKey] = useState('Mon Aug 18');
   const [weekSubView, setWeekSubView] = useState('GANTT'); // 'GANTT' or 'GRID'
+  const [connectedCalendars, setConnectedCalendars] = useState({ google: false, apple: false });
+  const [isNewTaskFlex, setIsNewTaskFlex] = useState(true);
+
+  const handleCalendarConnect = (provider) => {
+    setConnectedCalendars(prev => {
+      const isNowConnected = !prev[provider];
+      const name = provider === 'google' ? 'Google Calendar' : 'Apple Calendar';
+      if (isNowConnected) {
+        addNotification('success', `${name} Connected`, `Synced routine events & departures with VoltFlow.`);
+        addAuditLog(`Connected calendar integration: ${name}`);
+      } else {
+        addNotification('warning', `${name} Disconnected`, `Unlinked ${name}.`);
+      }
+      return { ...prev, [provider]: isNowConnected };
+    });
+  };
 
   const handleSimulateGanttDrag = () => {
     setWeeklySchedules(prev => ({
@@ -220,12 +236,13 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
       id: Date.now(),
       device: formData.get('device'),
       activity: formData.get('activity'),
-      startTime: formData.get('startTime') || '10:00 AM',
+      startTime: isNewTaskFlex ? '⚡ Auto (Grid-Balanced)' : (formData.get('startTime') || '10:00 AM'),
       deadline: formData.get('deadline') || '14:00 PM',
+      isFlexGrid: isNewTaskFlex,
       startPercent: '40%',
       widthPercent: '20%',
       colorClass: 'green',
-      costEst: '€0.40 (Dynamic Optimized)',
+      costEst: isNewTaskFlex ? '⚡ €0.15 (Grid-Balanced Dip)' : '€0.40 (Dynamic Optimized)',
       active: true
     };
     const targetDay = formData.get('targetDay') || activeKey;
@@ -234,7 +251,7 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
       [targetDay]: [...(prev[targetDay] || []), newTask]
     }));
     setShowAddTaskModal(false);
-    addNotification('success', 'Schedule Added', `Added ${newTask.activity} to ${targetDay}`);
+    addNotification('success', 'Flex Schedule Added', `Added ${newTask.activity} (${isNewTaskFlex ? '⚡ Flex-Grid Mode' : 'Fixed Window'}) to ${targetDay}`);
   };
 
   const handlePriorityMove = (index, direction) => {
@@ -251,8 +268,11 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
 
+      {/* Manual Scheduling Controls (Advanced View Only) */}
+      {!isSmartPlanner && (
+        <>
       {/* Top Main Mode Switcher: Crisp 3-Pill Navigation */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+      <div data-demo="adv-schedule-toolbar" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
         <div style={{ 
           display: 'flex', 
           background: 'rgba(255, 255, 255, 0.85)', 
@@ -286,9 +306,47 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
           </button>
         </div>
 
-        <button className="btn-primary" onClick={() => setShowAddTaskModal(true)}>
-          <Plus size={15} /> Add Custom Schedule
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
+          <button 
+            className={`btn-secondary ${connectedCalendars.apple ? 'active' : ''}`}
+            onClick={() => handleCalendarConnect('apple')}
+            style={{
+              fontSize: '0.78rem',
+              padding: '0.45rem 0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: connectedCalendars.apple ? 'rgba(5, 150, 105, 0.12)' : '#ffffff',
+              borderColor: connectedCalendars.apple ? 'rgba(5, 150, 105, 0.4)' : 'rgba(0, 0, 0, 0.1)',
+              color: connectedCalendars.apple ? '#047857' : '#334155'
+            }}
+          >
+            <CalendarIcon size={14} color={connectedCalendars.apple ? '#059669' : '#64748b'} />
+            {connectedCalendars.apple ? '✓ Apple Calendar' : 'Connect Apple Calendar'}
+          </button>
+
+          <button 
+            className={`btn-secondary ${connectedCalendars.google ? 'active' : ''}`}
+            onClick={() => handleCalendarConnect('google')}
+            style={{
+              fontSize: '0.78rem',
+              padding: '0.45rem 0.85rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              background: connectedCalendars.google ? 'rgba(5, 150, 105, 0.12)' : '#ffffff',
+              borderColor: connectedCalendars.google ? 'rgba(5, 150, 105, 0.4)' : 'rgba(0, 0, 0, 0.1)',
+              color: connectedCalendars.google ? '#047857' : '#334155'
+            }}
+          >
+            <CalendarIcon size={14} color={connectedCalendars.google ? '#059669' : '#64748b'} />
+            {connectedCalendars.google ? '✓ Google Calendar' : 'Connect Google Calendar'}
+          </button>
+
+          <button className="btn-primary" data-demo="btn-add-schedule" onClick={() => setShowAddTaskModal(true)}>
+            <Plus size={15} /> Add Custom Schedule
+          </button>
+        </div>
       </div>
 
       {/* 7-DAY WEEKLY STRIP (Appears only when 7-Day Planner is active) */}
@@ -353,9 +411,112 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
           </div>
         </div>
       )}
+        </>
+      )}
 
-      {/* 1. GANTT 24-HOUR INTERACTIVE TIMELINE */}
-      {(mainMode !== 'WEEK' || weekSubView === 'GANTT') && (
+      {/* SMART HANDS-FREE SCHEDULING VIEW VS ADVANCED GANTT VIEW */}
+      {isSmartPlanner ? (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.25rem' }}>
+
+          {/* Headline */}
+          <div className="glass-card" data-demo="smart-schedule-banner" style={{ padding: '1.25rem 1.5rem', borderRadius: '18px', background: 'linear-gradient(135deg, #ffffff, #f0fdf4)', border: '1px solid rgba(5,150,105,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '1rem' }}>
+              <div>
+                <div style={{ fontSize: '1.15rem', fontWeight: 800, color: '#0f172a' }}>Today's Autonomous Schedule</div>
+                <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>
+                  VoltFlow has planned the full day. Every appliance runs at the cheapest and greenest moment — automatically.
+                </div>
+              </div>
+              <div className="pill-badge green" style={{ fontSize: '0.8rem', padding: '6px 14px' }}>
+                <Sparkles size={14} /> AI Auto-Optimized
+              </div>
+            </div>
+          </div>
+
+          {/* Visual Timeline — read-only, no controls */}
+          <div className="glass-card" data-demo="smart-schedule-timeline" style={{ padding: '1.25rem 1.5rem', borderRadius: '18px', border: '1px solid rgba(0,0,0,0.08)' }}>
+            <div style={{ fontSize: '0.82rem', fontWeight: 700, color: '#64748b', marginBottom: '1rem', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              Today — Aug 19 &nbsp;·&nbsp; 24-Hour Timeline
+            </div>
+
+            {/* Hour ruler */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.68rem', color: '#94a3b8', marginBottom: '0.5rem', paddingRight: '2px' }}>
+              {['00:00', '06:00', '12:00', '18:00', '24:00'].map(t => <span key={t}>{t}</span>)}
+            </div>
+
+            {/* Timeline rows */}
+            {[
+              {
+                icon: '⚡', name: 'Tesla Model Y', sub: 'EV Charging', color: '#059669', bg: 'rgba(5,150,105,0.15)',
+                bars: [{ left: '4.2%', width: '25%' }], // 01:00 – 07:00
+                outcome: '100% by 07:30 AM', outcomeColor: '#059669',
+                cost: '€2.10 total', costNote: 'Off-peak €0.08/kWh'
+              },
+              {
+                icon: '☀️', name: 'Bosch Smart Washer', sub: 'Eco Wash Cycle', color: '#d97706', bg: 'rgba(217,119,6,0.15)',
+                bars: [{ left: '50%', width: '8.4%' }], // 12:00 – 14:00
+                outcome: 'Done by 2:00 PM', outcomeColor: '#d97706',
+                cost: '€0.00', costNote: 'Free self-solar'
+              },
+              {
+                icon: '🌡️', name: 'Daikin Heat Pump', sub: 'Thermal Pre-heat', color: '#0284c7', bg: 'rgba(2,132,199,0.15)',
+                bars: [{ left: '16.7%', width: '8.4%' }], // 04:00 – 06:00
+                outcome: '20.8°C warm start', outcomeColor: '#0284c7',
+                cost: '€0.52', costNote: 'Off-peak rate'
+              },
+              {
+                icon: '🔋', name: 'Tesla Powerwall 2', sub: 'Battery Charging', color: '#7c3aed', bg: 'rgba(124,58,237,0.15)',
+                bars: [{ left: '0%', width: '12.5%' }, { left: '50%', width: '16.7%' }], // 00:00–03:00 + 12:00–16:00
+                outcome: '90% by evening', outcomeColor: '#7c3aed',
+                cost: 'Solar self-charge', costNote: 'No cost during solar'
+              },
+            ].map((row, i) => (
+              <div key={i} style={{ marginBottom: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                  <span>{row.icon}</span>
+                  <span style={{ fontSize: '0.82rem', fontWeight: 700, color: '#0f172a' }}>{row.name}</span>
+                  <span style={{ fontSize: '0.72rem', color: '#64748b' }}>— {row.sub}</span>
+                  <span style={{ marginLeft: 'auto', fontSize: '0.72rem', color: row.outcomeColor, fontWeight: 700 }}>{row.outcome}</span>
+                </div>
+                <div style={{ position: 'relative', height: '22px', background: 'rgba(0,0,0,0.04)', borderRadius: '6px', overflow: 'hidden' }}>
+                  {row.bars.map((bar, bi) => (
+                    <div key={bi} style={{
+                      position: 'absolute', top: 0, bottom: 0,
+                      left: bar.left, width: bar.width,
+                      background: row.bg, borderRadius: '4px',
+                      border: `1px solid ${row.color}30`
+                    }} />
+                  ))}
+                </div>
+                <div style={{ fontSize: '0.68rem', color: '#94a3b8', marginTop: '3px', textAlign: 'right' }}>
+                  {row.cost} &nbsp;·&nbsp; {row.costNote}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Today's Summary — read-only */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '0.75rem' }}>
+            {[
+              { label: 'Scheduled Tasks', value: '4', sub: 'All auto-optimized', color: '#059669' },
+              { label: 'Today\'s Energy Cost', value: '€2.62', sub: 'vs €9.40 flat rate', color: '#047857' },
+              { label: 'Solar Self-Use', value: '84%', sub: 'of generation used locally', color: '#d97706' },
+              { label: 'Grid Peak Avoided', value: '18:00–20:00', sub: 'All heavy loads shifted', color: '#7c3aed' },
+            ].map((s, i) => (
+              <div key={i} style={{ padding: '1rem', background: '#ffffff', borderRadius: '14px', border: '1px solid rgba(0,0,0,0.07)' }}>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', fontWeight: 700, marginBottom: '4px' }}>{s.label}</div>
+                <div style={{ fontSize: '1.35rem', fontWeight: 800, color: s.color }}>{s.value}</div>
+                <div style={{ fontSize: '0.72rem', color: '#94a3b8', marginTop: '2px' }}>{s.sub}</div>
+              </div>
+            ))}
+          </div>
+
+        </div>
+      ) : (
+        /* ADVANCED 24-HOUR GANTT TIMELINE VIEW */
+        <>
+          {/* 1. GANTT 24-HOUR INTERACTIVE TIMELINE */}
+          {(mainMode !== 'WEEK' || weekSubView === 'GANTT') && (
         <div 
           className="glass-card"
           data-explain-title="24-Hour Interactive Timeline"
@@ -365,9 +526,6 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
             <div>
               <div className="card-title" style={{ color: '#0f172a' }}>
                 <CalendarIcon size={18} color="#d97706" /> 24-Hour Schedule Timeline — {activeKey}
-              </div>
-              <div className="card-subtitle" style={{ fontSize: '0.78rem', color: '#64748b' }}>
-                Automated appliance dispatch schedule and tariff alignment
               </div>
             </div>
             <div className="pill-badge green">{currentTasks.length} Active Tasks</div>
@@ -544,6 +702,8 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
           </div>
         </div>
       )}
+    </>
+  )}
 
       {/* EDIT TASK SCHEDULE MODAL */}
       {editingTask && (
@@ -564,13 +724,58 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
                 />
               </div>
 
+              {/* Flex Grid-Balancing Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'space-between',
+                background: editingTask.isFlexGrid ? 'rgba(5, 150, 105, 0.08)' : '#faf8f4',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                border: editingTask.isFlexGrid ? '1px solid rgba(5, 150, 105, 0.3)' : '1px solid rgba(0,0,0,0.08)'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: editingTask.isFlexGrid ? '#047857' : '#0f172a' }}>
+                    ⚡ Flex-Grid Balancing Mode
+                  </div>
+                  <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '2px' }}>
+                    Charge anytime before deadline based on live grid load & spot price dips
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={`btn-secondary ${editingTask.isFlexGrid ? 'active' : ''}`}
+                  onClick={() => setEditingTask(prev => ({
+                    ...prev,
+                    isFlexGrid: !prev.isFlexGrid,
+                    startTime: !prev.isFlexGrid ? '⚡ Auto (Grid-Balanced)' : '02:00 AM',
+                    costEst: !prev.isFlexGrid ? '⚡ €0.15 (Grid-Balanced Dip)' : '€0.40 (Dynamic Optimized)'
+                  }))}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '4px 10px',
+                    background: editingTask.isFlexGrid ? '#059669' : '#ffffff',
+                    color: editingTask.isFlexGrid ? '#ffffff' : '#334155',
+                    fontWeight: 700
+                  }}
+                >
+                  {editingTask.isFlexGrid ? '✓ Flex ON' : 'Flex OFF'}
+                </button>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div className="form-group">
                   <label className="form-label">Start Time</label>
                   <input 
                     className="form-input" 
-                    value={editingTask.startTime} 
+                    value={editingTask.isFlexGrid ? '⚡ Auto (Grid-Balanced)' : editingTask.startTime} 
+                    disabled={editingTask.isFlexGrid}
                     onChange={e => setEditingTask({ ...editingTask, startTime: e.target.value })} 
+                    style={{
+                      background: editingTask.isFlexGrid ? 'rgba(5, 150, 105, 0.08)' : '#ffffff',
+                      color: editingTask.isFlexGrid ? '#047857' : '#0f172a',
+                      fontWeight: editingTask.isFlexGrid ? 700 : 500
+                    }}
                   />
                 </div>
 
@@ -639,14 +844,58 @@ export const SchedulingView = ({ onOpenDeadlineModal }) => {
                 <input className="form-input" name="activity" placeholder="e.g. Quick Charge to 90%" defaultValue="Smart Solar Charge" required />
               </div>
 
+              {/* Flex Grid Balancing Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justify: 'space-between',
+                background: isNewTaskFlex ? 'rgba(5, 150, 105, 0.08)' : '#faf8f4',
+                padding: '0.75rem',
+                borderRadius: '12px',
+                border: isNewTaskFlex ? '1px solid rgba(5, 150, 105, 0.3)' : '1px solid rgba(0,0,0,0.08)'
+              }}>
+                <div>
+                  <div style={{ fontSize: '0.85rem', fontWeight: 700, color: isNewTaskFlex ? '#047857' : '#0f172a' }}>
+                    ⚡ Flex-Grid Balancing Mode
+                  </div>
+                  <div style={{ fontSize: '0.73rem', color: '#64748b', marginTop: '2px' }}>
+                    Charge anytime before deadline based on live grid load & spot price dips
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className={`btn-secondary ${isNewTaskFlex ? 'active' : ''}`}
+                  onClick={() => setIsNewTaskFlex(prev => !prev)}
+                  style={{
+                    fontSize: '0.75rem',
+                    padding: '4px 10px',
+                    background: isNewTaskFlex ? '#059669' : '#ffffff',
+                    color: isNewTaskFlex ? '#ffffff' : '#334155',
+                    fontWeight: 700
+                  }}
+                >
+                  {isNewTaskFlex ? '✓ Flex ON' : 'Flex OFF'}
+                </button>
+              </div>
+
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0.75rem' }}>
                 <div className="form-group">
-                  <label className="form-label">Preferred Start Time</label>
-                  <input className="form-input" name="startTime" defaultValue="11:00 AM" />
+                  <label className="form-label">Start Time</label>
+                  <input 
+                    className="form-input" 
+                    name="startTime" 
+                    value={isNewTaskFlex ? '⚡ Auto (Grid-Balanced)' : '11:00 AM'} 
+                    disabled={isNewTaskFlex}
+                    style={{
+                      background: isNewTaskFlex ? 'rgba(5, 150, 105, 0.08)' : '#ffffff',
+                      color: isNewTaskFlex ? '#047857' : '#0f172a',
+                      fontWeight: isNewTaskFlex ? 700 : 500
+                    }}
+                  />
                 </div>
 
                 <div className="form-group">
-                  <label className="form-label">Must-Finish Deadline</label>
+                  <label className="form-label">Completion Deadline</label>
                   <input className="form-input" name="deadline" defaultValue="16:00 PM" />
                 </div>
               </div>

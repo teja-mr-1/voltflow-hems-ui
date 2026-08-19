@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useEnergy } from '../../context/EnergyContext';
 import { 
   Award, 
@@ -8,14 +8,16 @@ import {
   CheckCircle2, 
   Car, 
   Users,
-  TrendingUp
+  TrendingUp,
+  Zap
 } from 'lucide-react';
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { PolymarketScrubberChart } from '../PolymarketScrubberChart';
 import { generateSavingsCumulativeHeartbeatData } from '../../utils/telemetryDataGenerator';
 
 export const SavingsView = () => {
-  const { userLimits } = useEnergy();
+  const { userLimits, addNotification } = useEnergy();
+  const [tariffStrategy, setTariffStrategy] = useState('balanced');
 
   const benchmarkData = [
     { category: 'Grid Shift Rewards', personal: 42, neighborhoodAvg: 18 },
@@ -26,15 +28,69 @@ export const SavingsView = () => {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
       <div>
-        <h2 style={{ fontSize: '1.4rem' }}>Savings, Rewards & Grid Impact Overview</h2>
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-          Track financial payback, DSO grid support earnings, CO2 reduction, and EV-Ready Guarantees
-        </p>
+        <h2 style={{ fontSize: '1.4rem' }}>Savings, Rewards & Tariff Strategy Control</h2>
+        <div style={{ fontSize: '0.85rem', color: '#64748b', marginTop: '2px' }}>Choose your optimization strategy and manually claim DSO flexibility earnings.</div>
+      </div>
+
+      {/* ⚙️ Manual Tariff Strategy Selector + Claim Payout */}
+      <div 
+        className="glass-card" 
+        data-demo="adv-savings-controls"
+        data-explain-title="Optimization Strategy & Payouts"
+        data-explain="Choose how aggressive you want your savings to be, and claim cash rewards you earned from the grid."
+        style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', border: '1.5px solid rgba(5,150,105,0.2)', background: 'linear-gradient(135deg, #ffffff, #f8faff)' }}
+      >
+        <div className="action-cell-label" style={{ marginBottom: '1rem' }}>⚙️ Manual Controls</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '1rem', alignItems: 'flex-start' }}>
+          {/* Tariff Strategy Selector */}
+          <div style={{ flex: '1 1 300px' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155', marginBottom: '0.5rem' }}>Optimization Strategy</div>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {[
+                { id: 'aggressive', label: '⚡ Aggressive', sub: 'Max savings, may delay comfort', cls: 'rose', explain: 'Prioritizes maximum bill reduction, shifting appliance runs strictly to cheapest hours.' },
+                { id: 'balanced', label: '⚖️ Balanced', sub: 'Savings + comfort blend', cls: 'emerald', explain: 'Even blend of money savings while keeping home temperature warm and EV ready.' },
+                { id: 'comfort', label: '🛋️ Comfort First', sub: 'Prioritize comfort over savings', cls: 'cyan', explain: 'Ensures instantaneous heating and rapid charging whenever you need it.' },
+              ].map(s => (
+                <button 
+                  key={s.id} 
+                  className={`btn-action ${tariffStrategy === s.id ? s.cls : 'neutral'}`} 
+                  onClick={() => { setTariffStrategy(s.id); addNotification('success', 'Strategy Updated', `Switched to ${s.label} optimization mode.`); }} 
+                  data-explain-title={s.label}
+                  data-explain={s.explain}
+                  style={{
+                    flex: 1, height: 'auto', flexDirection: 'column', padding: '0.6rem 0.5rem'
+                  }}
+                >
+                  <span style={{ fontWeight: 800, fontSize: '0.75rem' }}>{s.label}</span>
+                  <span style={{ fontSize: '0.65rem', marginTop: '2px', opacity: 0.75, fontWeight: 500 }}>{s.sub}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Claim Payout */}
+          <div style={{ flex: '0 0 auto', display: 'flex', flexDirection: 'column', gap: '0.5rem', justifyContent: 'flex-end' }}>
+            <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#334155' }}>Pending DSO Reward</div>
+            <button
+              className="btn-action emerald"
+              onClick={() => addNotification('success', 'Payout Claimed!', 'DSO flexibility reward of €12.40 transferred to your energy wallet.')}
+              data-explain-title="Claim Flexibility Reward"
+              data-explain="Transfers your earned grid flexibility cash rewards (€12.40) directly into your energy wallet."
+              style={{ width: 'auto', padding: '0.75rem 1.25rem', fontSize: '0.85rem', borderRadius: '10px' }}
+            >
+              <Zap size={16} style={{ marginRight: '6px' }} /> Claim €12.40 Reward
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Financial Payback & Environmental Impact Counter Hero */}
       <div className="kpi-grid">
-        <div className="kpi-card solar">
+        <div 
+          className="kpi-card solar"
+          data-explain-title="Monthly Money Saved"
+          data-explain="Total money saved on your electricity bill this month by shifting appliance use to cheap solar and night hours."
+        >
           <div className="kpi-icon-wrap">
             <DollarSign size={24} />
           </div>
@@ -45,7 +101,11 @@ export const SavingsView = () => {
           </div>
         </div>
 
-        <div className="kpi-card home">
+        <div 
+          className="kpi-card home"
+          data-explain-title="Grid Flexibility Earnings"
+          data-explain="Direct cash payments earned from the grid operator for helping relieve grid congestion during peak hours."
+        >
           <div className="kpi-icon-wrap">
             <Award size={24} />
           </div>
@@ -56,7 +116,11 @@ export const SavingsView = () => {
           </div>
         </div>
 
-        <div className="kpi-card battery">
+        <div 
+          className="kpi-card battery"
+          data-explain-title="Carbon CO2 Saved"
+          data-explain="Total carbon dioxide emissions prevented this month by using rooftop solar instead of fossil fuel power plants."
+        >
           <div className="kpi-icon-wrap">
             <Leaf size={24} />
           </div>
@@ -67,7 +131,11 @@ export const SavingsView = () => {
           </div>
         </div>
 
-        <div className="kpi-card grid">
+        <div 
+          className="kpi-card grid"
+          data-explain-title="EV Departure Guarantee"
+          data-explain="Confirmation that your electric car battery will be charged and ready to go before your morning commute."
+        >
           <div className="kpi-icon-wrap">
             <ShieldCheck size={24} />
           </div>
@@ -79,50 +147,17 @@ export const SavingsView = () => {
         </div>
       </div>
 
-      {/* Main Grid: EV-Ready Guarantee Badge & Personal vs Community Benchmark */}
-      <div className="grid-cols-12">
-        {/* EV-Ready Guarantee Card */}
-        <div className="glass-card col-span-5" style={{
-          background: 'linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(255, 255, 255, 0.95))',
-          border: '1px solid rgba(5, 150, 105, 0.3)'
-        }}>
-          <div className="card-header">
-            <div>
-              <div className="card-title" style={{ color: '#047857' }}>
-                <Car size={20} /> Official EV-Ready Guarantee Badge
-              </div>
-              <div className="card-subtitle">System commitment verifying required departure battery level</div>
-            </div>
-            <div className="pill-badge green" style={{ padding: '4px 10px' }}>Active Guarantee</div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', marginTop: '0.5rem' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', background: '#ffffff', padding: '1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.08)' }}>
-              <div style={{ width: '48px', height: '48px', borderRadius: '50%', background: 'rgba(5, 150, 105, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#059669' }}>
-                <CheckCircle2 size={28} />
-              </div>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: '1rem', color: '#0f172a' }}>Departure Target Confirmed</div>
-                <div style={{ fontSize: '0.8rem', color: '#475569' }}>
-                  Target 85% Battery by <strong>{userLimits.departureTime} AM</strong> tomorrow.
-                </div>
-              </div>
-            </div>
-
-            <div style={{ fontSize: '0.8rem', color: '#334155', lineHeight: 1.5, fontWeight: 500 }}>
-              🔒 <strong>Guarantee Mechanics:</strong> If dynamic grid prices spike unexpectedly, VoltFlow will automatically override economic constraints to ensure your vehicle charges at full rate before your deadline.
-            </div>
-          </div>
-        </div>
-
-        {/* Personal Savings vs Neighborhood Benchmark */}
-        <div className="glass-card col-span-7">
+      {/* Personal Savings vs Neighborhood Benchmark */}
+      <div 
+        className="glass-card col-span-12"
+        data-explain-title="Neighborhood Comparison Benchmark"
+        data-explain="Compares your household solar usage, peak shifting, and rewards against the average home in your neighborhood."
+      >
           <div className="card-header">
             <div>
               <div className="card-title">
                 <Users size={18} color="var(--battery-cyan)" /> Personal Savings vs Neighborhood Household Benchmark
               </div>
-              <div className="card-subtitle">Comparison between your home flexibility contribution and city average</div>
             </div>
           </div>
 
@@ -138,19 +173,22 @@ export const SavingsView = () => {
             </ResponsiveContainer>
           </div>
         </div>
-      </div>
 
       {/* GRAPH 3: Pure 3-Line 30-Day Financial Returns & Net Earnings */}
-      <PolymarketScrubberChart
-        title="30-Day Cumulative Energy Savings, Flexibility Earnings & Net Returns"
-        subtitle="Cumulative cost optimization and grid flexibility earnings"
-        icon={TrendingUp}
-        data={generateSavingsCumulativeHeartbeatData()}
-        series1={{ key: 'cumulativeSavings', name: 'Tariff Shift Savings (€)', color: '#d97706', unit: ' €' }}
-        series2={{ key: 'flexEarnings', name: 'DSO Cash Payout (€)', color: '#059669', unit: ' €' }}
-        series3={{ key: 'netReturn', name: 'Net Financial Return (€)', color: '#7c3aed', unit: ' €' }}
-        idPrefix="savingsScrubber"
-      />
+      <div
+        data-explain-title="30-Day Financial Earnings Graph"
+        data-explain="Interactive timeline showing your cumulative daily bill savings, DSO cash payouts, and total net financial returns."
+      >
+        <PolymarketScrubberChart
+          title="30-Day Cumulative Energy Savings, Flexibility Earnings & Net Returns"
+          icon={TrendingUp}
+          data={generateSavingsCumulativeHeartbeatData()}
+          series1={{ key: 'cumulativeSavings', name: 'Tariff Shift Savings (€)', color: '#d97706', unit: ' €' }}
+          series2={{ key: 'flexEarnings', name: 'DSO Cash Payout (€)', color: '#059669', unit: ' €' }}
+          series3={{ key: 'netReturn', name: 'Net Financial Return (€)', color: '#7c3aed', unit: ' €' }}
+          idPrefix="savingsScrubber"
+        />
+      </div>
     </div>
   );
 };

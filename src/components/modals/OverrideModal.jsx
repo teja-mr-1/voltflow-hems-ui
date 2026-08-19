@@ -22,11 +22,7 @@ export const OverrideModal = ({ onClose }) => {
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1rem' }}>
-          Instantly stop all background schedule shifts, price optimization routines, and grid flexibility responses.
-        </p>
-
-        <div className="form-group">
+        <div className="form-group" style={{ marginTop: '0.75rem' }}>
           <label className="form-label">Select Pause Duration</label>
           <select 
             className="form-select" 

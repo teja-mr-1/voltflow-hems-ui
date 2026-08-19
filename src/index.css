@@ -955,6 +955,119 @@ h1, h2, h3, h4, h5, h6 {
 .pill-badge.amber { background: rgba(217, 119, 6, 0.12); color: #b45309; border: 1px solid rgba(217, 119, 6, 0.3); }
 .pill-badge.violet { background: rgba(124, 58, 237, 0.12); color: #6d28d9; border: 1px solid rgba(124, 58, 237, 0.3); }
 
+/* ============================================================
+   UNIFIED ACTION BUTTON SYSTEM — Consistent Color Grading
+   Used across both Smart Mode and Advanced View for all
+   inline manual action buttons. Eliminates random inline hex.
+   ============================================================ */
+.btn-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+  font-family: var(--font-body);
+  letter-spacing: 0.01em;
+}
+.btn-action:hover { transform: translateY(-1px); }
+.btn-action:active { transform: scale(0.97); }
+
+/* Emerald — EV, Savings, Active/On states */
+.btn-action.emerald {
+  background: rgba(5, 150, 105, 0.08);
+  border: 1px solid rgba(5, 150, 105, 0.35);
+  color: #047857;
+}
+.btn-action.emerald:hover {
+  background: rgba(5, 150, 105, 0.14);
+  border-color: rgba(5, 150, 105, 0.55);
+}
+
+/* Amber — Solar, Washer, Pause, Override states */
+.btn-action.amber {
+  background: rgba(217, 119, 6, 0.08);
+  border: 1px solid rgba(217, 119, 6, 0.35);
+  color: #b45309;
+}
+.btn-action.amber:hover {
+  background: rgba(217, 119, 6, 0.14);
+  border-color: rgba(217, 119, 6, 0.55);
+}
+
+/* Cyan/Blue — Battery charge, network, info states */
+.btn-action.cyan {
+  background: rgba(2, 132, 199, 0.08);
+  border: 1px solid rgba(2, 132, 199, 0.35);
+  color: #0369a1;
+}
+.btn-action.cyan:hover {
+  background: rgba(2, 132, 199, 0.14);
+  border-color: rgba(2, 132, 199, 0.55);
+}
+
+/* Violet — Grid export, market, V2H, community states */
+.btn-action.violet {
+  background: rgba(124, 58, 237, 0.08);
+  border: 1px solid rgba(124, 58, 237, 0.35);
+  color: #6d28d9;
+}
+.btn-action.violet:hover {
+  background: rgba(124, 58, 237, 0.14);
+  border-color: rgba(124, 58, 237, 0.55);
+}
+
+/* Rose — Danger, shed, stop, delete states */
+.btn-action.rose {
+  background: rgba(225, 29, 72, 0.07);
+  border: 1px solid rgba(225, 29, 72, 0.3);
+  color: #be123c;
+}
+.btn-action.rose:hover {
+  background: rgba(225, 29, 72, 0.13);
+  border-color: rgba(225, 29, 72, 0.5);
+}
+
+/* Neutral — Hold, suspend, inactive states */
+.btn-action.neutral {
+  background: rgba(0, 0, 0, 0.04);
+  border: 1px solid rgba(0, 0, 0, 0.14);
+  color: #64748b;
+}
+.btn-action.neutral:hover {
+  background: rgba(0, 0, 0, 0.08);
+  border-color: rgba(0, 0, 0, 0.22);
+  color: #334155;
+}
+
+/* Action Card Sub-container — device quick-action panel cells */
+.action-cell {
+  flex: 1 1 180px;
+  padding: 0.9rem 1rem;
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.07);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.03);
+}
+.action-cell-label {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 3px;
+}
+.action-cell-sub {
+  font-size: 0.76rem;
+  color: #475569;
+  margin-bottom: 8px;
+  font-weight: 500;
+}
+
 /* Animated Energy Conduits & Futuristic Vector Nodes */
 @keyframes energyPulse {
   0% { stroke-dashoffset: 60; }

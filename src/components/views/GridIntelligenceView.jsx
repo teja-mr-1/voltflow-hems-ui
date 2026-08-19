@@ -68,49 +68,66 @@ export const GridIntelligenceView = () => {
         </div>
       </div>
 
-      {/* Financial & Environmental KPI Counters */}
+      {/* Substation Engineering Telemetry KPI Row */}
       <div className="kpi-grid">
         <div className="kpi-card solar">
-          <div className="kpi-icon-wrap"><DollarSign size={24} /></div>
+          <div className="kpi-icon-wrap"><Radio size={24} /></div>
           <div>
-            <div className="kpi-label">Monthly Saved</div>
-            <div className="kpi-val" style={{ color: '#d97706' }}>€148.50</div>
-            <div className="kpi-subtext">+34% vs flat rate tariff</div>
+            <div className="kpi-label">Substation Load</div>
+            <div className="kpi-[#059669]" style={{ color: '#059669', fontSize: '1.25rem', fontWeight: 800 }}>3.42 MVA</div>
+            <div className="kpi-subtext">Capacity: 5.0 MVA</div>
           </div>
         </div>
 
         <div className="kpi-card home">
-          <div className="kpi-icon-wrap"><ShieldCheck size={24} /></div>
+          <div className="kpi-icon-wrap"><Activity size={24} /></div>
           <div>
-            <div className="kpi-label">Grid Flexibility Payout</div>
-            <div className="kpi-val" style={{ color: '#047857' }}>€42.80</div>
-            <div className="kpi-subtext">DSO peak-response cash</div>
+            <div className="kpi-label">Grid Frequency</div>
+            <div className="kpi-val" style={{ color: '#047857' }}>49.98 Hz</div>
+            <div className="kpi-subtext">Nominal: 50.00 Hz</div>
           </div>
         </div>
 
         <div className="kpi-card battery">
-          <div className="kpi-icon-wrap"><Leaf size={24} /></div>
+          <div className="kpi-icon-wrap"><DollarSign size={24} /></div>
           <div>
-            <div className="kpi-label">Carbon Offset</div>
-            <div className="kpi-val" style={{ color: '#0284c7' }}>184 kg CO2</div>
-            <div className="kpi-subtext">9 trees planted equivalent</div>
+            <div className="kpi-label">Dynamic Spot Price</div>
+            <div className="kpi-val" style={{ color: '#d97706' }}>€0.08 / kWh</div>
+            <div className="kpi-subtext">Off-Peak Rate</div>
           </div>
         </div>
 
         <div className="kpi-card grid">
           <div className="kpi-icon-wrap"><CheckCircle2 size={24} /></div>
           <div>
-            <div className="kpi-label">EV Ready Guarantee</div>
-            <div className="kpi-val" style={{ color: '#047857' }}>100% Ready</div>
-            <div className="kpi-subtext">Target 85% by {userLimits.departureTime} AM</div>
+            <div className="kpi-label">Congestion Index</div>
+            <div className="kpi-val" style={{ color: '#047857' }}>2.1 / 10</div>
+            <div className="kpi-subtext">Low Feeder Stress</div>
           </div>
+        </div>
+      </div>
+
+      {/* Manual DSO Response Action Panel */}
+      <div className="glass-card" data-demo="adv-dso-actions" style={{ padding: '1.25rem 1.5rem', borderRadius: '16px', border: `1.5px solid ${gridStatus === 'red' ? 'rgba(225,29,72,0.3)' : gridStatus === 'yellow' ? 'rgba(217,119,6,0.25)' : 'rgba(5,150,105,0.2)'}`, background: '#ffffff' }}>
+        <div className="action-cell-label" style={{ marginBottom: '0.85rem' }}>Manual DSO Response Actions — Override Automated Dispatch</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '0.65rem' }}>
+          {[
+            { label: 'Shed EV Charger', sub: 'Stop EV draw immediately', cls: 'rose' },
+            { label: 'Shed Heat Pump', sub: 'Pause HVAC for 30 min', cls: 'amber' },
+            { label: 'Discharge Battery', sub: 'Export Powerwall to grid', cls: 'violet' },
+            { label: '💶 Claim Flex Reward', sub: 'Earn payout for load shed', cls: 'emerald' },
+          ].map((action, i) => (
+            <button key={i} className={`btn-action ${action.cls}`} onClick={() => {}} style={{ flex: '1 1 160px', height: 'auto', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', padding: '0.75rem 0.85rem' }}>
+              <span style={{ fontWeight: 800, fontSize: '0.82rem' }}>{action.label}</span>
+              <span style={{ fontSize: '0.7rem', opacity: 0.75, marginTop: '2px', fontWeight: 500 }}>{action.sub}</span>
+            </button>
+          ))}
         </div>
       </div>
 
       {/* GRAPH 2: Pure 3-Line Substation Tariff, Transformer Load & Congestion Risk */}
       <PolymarketScrubberChart
         title="24-Hour Substation Spot Tariff, Transformer Load & Congestion Risk"
-        subtitle="Substation dynamic tariff pricing and transformer load telemetry"
         icon={Activity}
         data={generateSubstationTariffHeartbeatData()}
         series1={{ key: 'tariffRate', name: 'Dynamic Spot Tariff (€/kWh)', color: '#059669', unit: ' €/kWh' }}
@@ -119,43 +136,6 @@ export const GridIntelligenceView = () => {
         idPrefix="gridScrubber"
       />
 
-      {/* Zero-Knowledge Privacy Shield Card */}
-      <div className="glass-card" style={{
-        background: 'linear-gradient(135deg, rgba(124, 58, 237, 0.06), rgba(255, 255, 255, 0.98))',
-        border: '1px solid rgba(124, 58, 237, 0.25)'
-      }}>
-        <div className="card-header">
-          <div>
-            <div className="card-title" style={{ color: '#6d28d9' }}>
-              <Lock size={18} /> Zero-Knowledge DSO Privacy Shield
-            </div>
-          </div>
-          <div className="pill-badge violet">Zero Raw Telemetry Leakage</div>
-        </div>
-
-        <div className="grid-cols-12" style={{ marginTop: '0.5rem', alignItems: 'center' }}>
-          <div className="col-span-5" style={{ background: '#ffffff', padding: '0.9rem 1.1rem', borderRadius: '12px', border: '1px solid rgba(0,0,0,0.08)' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#dc2626', marginBottom: '0.4rem' }}>🔒 Private Local Telemetry</div>
-            <div style={{ fontSize: '0.78rem', color: '#475569', fontWeight: 500 }}>
-              Appliance types, room occupancy, temperature settings, and personal schedules are strictly locked inside your home gateway.
-            </div>
-          </div>
-
-          <div className="col-span-2" style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: '0.75rem', fontWeight: 800, color: '#047857', textTransform: 'uppercase' }}>Shield Filter</div>
-            <div style={{ fontSize: '1.2rem', color: '#047857' }}>➔ ➔ ➔</div>
-          </div>
-
-          <div className="col-span-5" style={{ background: 'rgba(5, 150, 105, 0.08)', padding: '0.9rem 1.1rem', borderRadius: '12px', border: '1px solid rgba(5, 150, 105, 0.3)' }}>
-            <div style={{ fontSize: '0.85rem', fontWeight: 700, color: '#047857', marginBottom: '0.4rem' }}>
-              <Server size={14} style={{ display: 'inline', marginRight: '4px' }} /> Public DSO Grid Output
-            </div>
-            <div style={{ fontSize: '0.78rem', color: '#0f172a', fontWeight: 600 }}>
-              "Substation Node #402 can curtail <strong>2.0 kW</strong> capacity without disclosing domestic activity."
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 };

@@ -22,11 +22,7 @@ export const EmergencyBoostModal = ({ onClose }) => {
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
 
-        <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5, marginBottom: '1rem' }}>
-          Immediately force EV Chargers (11 kW) and Heat Pump HVAC to maximum power output regardless of electricity prices or grid congestion.
-        </p>
-
-        <div className="form-group">
+        <div className="form-group" style={{ marginTop: '0.75rem' }}>
           <label className="form-label">Boost Duration</label>
           <select 
             className="form-select" 

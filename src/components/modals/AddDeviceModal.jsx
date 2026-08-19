@@ -99,13 +99,11 @@ export const AddDeviceModal = ({ onClose }) => {
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <Wifi size={40} className="pulse-red" color="var(--battery-cyan)" />
                 <div style={{ fontSize: '0.95rem', fontWeight: 600 }}>Scanning Wi-Fi & Modbus Network...</div>
-                <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)' }}>Broadcasting mDNS query for smart inverter and wallbox APIs</div>
               </div>
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '1rem' }}>
                 <CheckCircle2 size={40} color="var(--primary-emerald)" />
                 <div style={{ fontSize: '1rem', fontWeight: 700 }}>Discovered 1 Compatible Asset</div>
-                <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Found smart hardware on IP: 192.168.1.145</div>
                 <button className="btn-primary" onClick={handleNextStep}>Configure Authorization</button>
               </div>
             )}
@@ -136,10 +134,7 @@ export const AddDeviceModal = ({ onClose }) => {
         {step === 4 && (
           <div style={{ textAlign: 'center', padding: '1rem 0' }}>
             <CheckCircle2 size={48} color="var(--primary-emerald)" style={{ marginBottom: '0.75rem' }} />
-            <div style={{ fontSize: '1.2rem', fontWeight: 800 }}>Device Successfully Paired!</div>
-            <p style={{ fontSize: '0.825rem', color: 'var(--text-muted)', margin: '0.5rem 0 1.25rem 0' }}>
-              {deviceName || selectedCategory} has been connected to VoltFlow HEMS. Automated energy optimization is active.
-            </p>
+            <div style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '1.25rem' }}>Device Successfully Paired!</div>
             <button className="btn-primary" onClick={handleFinish}>Return to Hardware Dashboard</button>
           </div>
         )}

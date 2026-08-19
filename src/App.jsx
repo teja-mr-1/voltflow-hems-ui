@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { EnergyProvider } from './context/EnergyContext';
+import { EnergyProvider, useEnergy } from './context/EnergyContext';
 import { Header } from './components/Header';
 import { NavBar } from './components/NavBar';
 import { DemoMode } from './components/DemoMode';
@@ -25,6 +25,7 @@ import { AntigravityBackground } from './components/AntigravityBackground';
 import { KnowEverythingInspector } from './components/KnowEverythingInspector';
 
 function AppContent() {
+  const { isSmartPlanner } = useEnergy();
   const [activeTab, setActiveTab] = useState('overview');
   const [animKey, setAnimKey] = useState(0);
   const [isDemoMode, setIsDemoMode] = useState(false);
@@ -39,6 +40,13 @@ function AppContent() {
     setActiveTab(tab);
     setAnimKey(k => k + 1);
   };
+
+  // Enforce essential tabs when in Smart Hands-Free mode
+  const allowedTabs = isSmartPlanner 
+    ? ['overview', 'devices', 'scheduling'] 
+    : ['overview', 'devices', 'scheduling', 'controls', 'grid', 'savings', 'privacy', 'reliability', 'future_lab'];
+
+  const effectiveTab = allowedTabs.includes(activeTab) ? activeTab : 'overview';
 
   return (
     <div className="app-container" style={{ position: 'relative', zIndex: 1 }}>
@@ -55,27 +63,27 @@ function AppContent() {
         />
 
         {/* 9 Dedicated Tabs Single-Row Navigation Bar */}
-        <NavBar activeTab={activeTab} setActiveTab={handleTabChange} />
+        <NavBar activeTab={effectiveTab} setActiveTab={handleTabChange} />
       </div>
 
       {/* Primary Dynamic Main Content — Animated Tab View */}
       <main className="main-content">
         <div key={animKey} style={{ animation: 'viewFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards' }}>
           {/* Module 1: Live Energy Overview */}
-          {activeTab === 'overview' && <OverviewView />}
+          {effectiveTab === 'overview' && <OverviewView />}
 
           {/* Module 2: Connected Fleet Hardware & Wizard */}
-          {activeTab === 'devices' && (
+          {effectiveTab === 'devices' && (
             <DevicesView onOpenAddDeviceWizard={() => setShowAddDeviceModal(true)} />
           )}
 
           {/* Module 3: Smart Scheduling & 7-Day Gantt */}
-          {activeTab === 'scheduling' && (
+          {effectiveTab === 'scheduling' && (
             <SchedulingView onOpenDeadlineModal={() => setShowDeadlineModal(true)} />
           )}
 
           {/* Module 4: Priorities & User Control Thresholds */}
-          {activeTab === 'controls' && (
+          {effectiveTab === 'controls' && (
             <ControlsView 
               onOpenOverrideModal={() => setShowOverrideModal(true)}
               onOpenEmergencyModal={() => setShowEmergencyModal(true)}
@@ -83,19 +91,19 @@ function AppContent() {
           )}
 
           {/* Module 5: Grid Signals & AI Advice Explanations */}
-          {activeTab === 'grid' && <GridIntelligenceView />}
+          {effectiveTab === 'grid' && <GridIntelligenceView />}
 
           {/* Modules 6 & 7: Savings, Rewards & EV Guarantees */}
-          {activeTab === 'savings' && <SavingsView />}
+          {effectiveTab === 'savings' && <SavingsView />}
 
           {/* Module 8: Granular Privacy & DSO Shield */}
-          {activeTab === 'privacy' && <PrivacyView />}
+          {effectiveTab === 'privacy' && <PrivacyView />}
 
           {/* Modules 9 & 10: Offline Safe Mode & Household Support */}
-          {activeTab === 'reliability' && <ReliabilityView />}
+          {effectiveTab === 'reliability' && <ReliabilityView />}
 
           {/* Module 11: Future V2H Energy Lab */}
-          {activeTab === 'future_lab' && <FutureLabView />}
+          {effectiveTab === 'future_lab' && <FutureLabView />}
         </div>
       </main>
 
